@@ -1,0 +1,12 @@
+td {
+  border: 1px solid;
+  text-align: center;
+
+  &.selected {
+    background-color: olivedrab !important;
+  }
+
+  &.highlighted {
+    background-color: darkseagreen !important;
+  }
+}

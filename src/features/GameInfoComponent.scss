@@ -1,0 +1,10 @@
+div.game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.material-score, .check-state {
+  display: flex;
+  gap: 15px;
+}
