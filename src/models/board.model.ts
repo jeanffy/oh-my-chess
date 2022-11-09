@@ -1,6 +1,5 @@
-import { BoardAIPlayerStrategyHelper } from './board-ai-player-strategies/board-ai-player-strategy.helper';
 import { BoardInitModel } from './board-init.model';
-import { BoardMovesModel } from './board-moves.model';
+import { BoardValidMovesModel } from './board-valid-moves.model';
 import { BoardRepresentationModel, CodeMove, SquareCode, SquareIndex } from './board-representation.model';
 import { Piece, PieceColor, PieceKind, SquareModel } from './square.model';
 
@@ -12,7 +11,11 @@ export interface BoardMaterialScores {
 export interface BoardMove {
   from: SquareCode;
   to: SquareCode;
+}
+
+export interface BoardValidMove extends BoardMove {
   take?: Piece;
+  nextBoard: BoardModel;
 }
 
 export type BoardSquareCallback = (square: SquareModel, index: SquareIndex) => void;
@@ -20,17 +23,26 @@ export type BoardSquareCallback = (square: SquareModel, index: SquareIndex) => v
 export interface BoardGameState {
   pat: false;
   whiteCheck: boolean;
-  whiteMat: boolean;
+  whiteCheckmate: boolean;
   blackCheck: boolean;
-  blackMat: boolean;
+  blackCheckmate: boolean;
+}
+
+export interface PieceWithMoves {
+  square: SquareModel;
+  validMoves: BoardValidMove[];
 }
 
 export class BoardModel {
-  public rowCount = 8;
-  public columnCount = 8;
+  public rowCount: number;
+  public columnCount: number;
   public squares: SquareModel[][];
+  public gameState: BoardGameState;
 
-  public constructor() {
+  public constructor(other?: BoardModel) {
+    this.rowCount = (other !== undefined ? other.rowCount : 8);
+    this.columnCount = (other !== undefined ? other.columnCount : 8);
+
     BoardRepresentationModel.init(this.columnCount, this.rowCount);
 
     // we allocate squares in a 2-dim array so that 1st index is the column and the 2nd is the row
@@ -62,11 +74,29 @@ export class BoardModel {
     for (let ci = 0; ci < this.columnCount; ci++) {
       this.squares[ci] = Array(this.rowCount).fill(undefined);
       for (let ri = 0; ri < this.rowCount; ri++) {
-        this.squares[ci][ri] = { code: BoardRepresentationModel.indexToCode(ci, ri), piece: undefined };
+        if (other !== undefined) {
+          this.squares[ci][ri] = { code: other.squares[ci][ri].code, piece: other.squares[ci][ri].piece };
+        } else {
+          this.squares[ci][ri] = { code: BoardRepresentationModel.indexToCode(ci, ri), piece: undefined };
+        }
       }
     }
 
     BoardInitModel.populateBoard(this);
+
+    this.gameState = (other !== undefined ? other.gameState : {
+      pat: false,
+      whiteCheck: false,
+      whiteCheckmate: false,
+      blackCheck: false,
+      blackCheckmate: false
+    });
+  }
+
+  public cloneWithMove(move: BoardMove): BoardModel {
+    const clone = new BoardModel(this);
+    clone.move(move);
+    return clone;
   }
 
   public forEachSquare(callback: BoardSquareCallback): void {
@@ -87,7 +117,7 @@ export class BoardModel {
     return this.squareAt(code, codeMove.cm, codeMove.rm);
   }
 
-  public validMoves = BoardMovesModel.validMoves;
+  public validMoves = BoardValidMovesModel.validMoves;
 
   public move(move: BoardMove): Piece | undefined {
     const squareFrom = this.squareAt(move.from);
@@ -105,6 +135,10 @@ export class BoardModel {
     squareTo.piece = squareFrom.piece;
     squareTo.piece.firstMove = false;
     squareFrom.piece = undefined;
+
+    this.gameState = this.computeGameState();
+
+    return taken;
   }
 
   public setSquare(code: SquareCode, kind: PieceKind, color: PieceColor, strength: number): void {
@@ -136,17 +170,37 @@ export class BoardModel {
     return scores;
   }
 
-  public computeGameState(): BoardGameState {
-    const whitePiecesThatCanMove = BoardAIPlayerStrategyHelper.getAllPiecesWithValidMoves(this, PieceColor.White);
-    const whitePiecesThatCanTakeBlackKing = whitePiecesThatCanMove.filter(p => p.validMoves.some(m => m.take !== undefined && m.take.kind === PieceKind.King));
-    const blackPiecesThatCanMove = BoardAIPlayerStrategyHelper.getAllPiecesWithValidMoves(this, PieceColor.Black);
-    const blackPiecesThatCanTakeBlackKing = blackPiecesThatCanMove.filter(p => p.validMoves.some(m => m.take !== undefined && m.take.kind === PieceKind.King));
+  public getAllPiecesWithValidMoves(color: PieceColor, computeNextBoard: boolean): PieceWithMoves[] {
+    const allPieces: SquareModel[] = [];
+    this.forEachSquare(square => {
+      if (square.piece !== undefined && square.piece.color === color) {
+        allPieces.push(square);
+      }
+    });
+    return allPieces
+      .map(p => ({ square: p, validMoves: this.validMoves({ from: p.code, computeNextBoard: computeNextBoard }) }))
+      .filter(p => p.validMoves.length > 0);
+  }
+
+  protected computeGameState(): BoardGameState {
+    const whiteMoves = this.getAllPiecesWithValidMoves(PieceColor.White, false).flatMap(p => p.validMoves);
+    const blackMoves = this.getAllPiecesWithValidMoves(PieceColor.Black, false).flatMap(p => p.validMoves);
+    const whiteCheck = blackMoves.some(m => m.take?.kind === PieceKind.King);
+    const blackCheck = whiteMoves.some(m => m.take?.kind === PieceKind.King);
+    let whiteCheckmate = false;
+    if (whiteCheck) {
+
+    }
+    let blackCheckmate = false;
+    if (blackCheck) {
+
+    }
     return {
-      pat: false,
-      whiteCheck: (blackPiecesThatCanTakeBlackKing.length > 0),
-      whiteMat: false,
-      blackCheck: (whitePiecesThatCanTakeBlackKing.length > 0),
-      blackMat: false
+      pat: false, // TODO: detect pat
+      whiteCheck: whiteCheck,
+      whiteCheckmate: whiteCheckmate,
+      blackCheck: blackCheck,
+      blackCheckmate: blackCheckmate
     };
   }
 }

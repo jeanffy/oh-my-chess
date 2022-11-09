@@ -25,6 +25,10 @@ export class GameInfoComponent extends React.Component<GameInfoProps> {
           <TextField variant="outlined" label="Check state white" value={this.props.gameInfo.gameState.whiteCheck ? 'true' : 'false'} inputProps={{ readOnly: true }}/>
           <TextField variant="outlined" label="Check state black" value={this.props.gameInfo.gameState.blackCheck ? 'true' : 'false'} inputProps={{ readOnly: true }}/>
         </div>
+        <div className="checkmate-state">
+          <TextField variant="outlined" label="Mate state white" value={this.props.gameInfo.gameState.whiteCheckmate ? 'true' : 'false'} inputProps={{ readOnly: true }}/>
+          <TextField variant="outlined" label="Mate state black" value={this.props.gameInfo.gameState.blackCheckmate ? 'true' : 'false'} inputProps={{ readOnly: true }}/>
+        </div>
       </div>
     );
   }

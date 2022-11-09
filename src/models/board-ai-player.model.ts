@@ -1,6 +1,6 @@
 import { BoardAIPlayerStrategyGreedyModel } from './board-ai-player-strategies/board-ai-player-strategy-greedy.model';
 import { BoardAIPlayerStrategyRandomModel } from './board-ai-player-strategies/board-ai-player-strategy-random.model';
-import { BoardModel, BoardMove } from './board.model';
+import { BoardModel, BoardValidMove } from './board.model';
 import { PieceColor } from './square.model';
 
 export enum BoardAIPlayerStrategy {
@@ -12,7 +12,7 @@ export class BoardAIPlayerModel {
   public constructor(private board: BoardModel) {
   }
 
-  public async getNextMove(color: PieceColor, strategy: BoardAIPlayerStrategy): Promise<BoardMove> {
+  public async getNextMove(color: PieceColor, strategy: BoardAIPlayerStrategy): Promise<BoardValidMove> {
     switch (strategy) {
       case BoardAIPlayerStrategy.Random:
         await new Promise(resolve => setTimeout(resolve, 500)); // to simulate some thinking

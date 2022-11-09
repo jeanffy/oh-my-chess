@@ -13,6 +13,9 @@ export namespace BoardInitModel {
     // white are at bottom of the board
     // black are at top of the board
 
+    // board.setSquare('a1', PieceKind.King, PieceColor.White, 0);
+    // board.setSquare('c2', PieceKind.Queen, PieceColor.Black, 0);
+
     board.setSquare('a1', PieceKind.Rook, PieceColor.White, rookPoints);
     board.setSquare('b1', PieceKind.Knight, PieceColor.White, knightPoints);
     board.setSquare('c1', PieceKind.Bishop, PieceColor.White, bishopPoints);

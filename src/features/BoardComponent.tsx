@@ -1,6 +1,6 @@
 import React from 'react';
 import { Subject, Subscription, tap } from 'rxjs';
-import {  BoardModel, BoardMove } from '../models/board.model';
+import {  BoardModel, BoardMove, BoardValidMove } from '../models/board.model';
 import { GameInfoModel } from '../models/game-info.model';
 import { Piece, SquareModel } from '../models/square.model';
 import './BoardComponent.scss';
@@ -74,7 +74,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
     }
 
     // another piece already selected -> move
-    const validMoves = this.props.model.validMoves(this.state.selectedSquare.code);
+    const validMoves = this.props.model.validMoves({ from: this.state.selectedSquare.code, computeNextBoard: true });
     if (validMoves.map(m => m.to).includes(square.code)) {
       this.props.boardActionEvent.next({
         move: { from: this.state.selectedSquare.code, to: square.code },
@@ -88,7 +88,10 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
   }
 
   public render(): React.ReactNode {
-    const validMoves = (this.state.selectedSquare !== undefined ? this.props.model.validMoves(this.state.selectedSquare.code) : []);
+    let validMoves: BoardValidMove[] = [];
+    if (this.state.selectedSquare !== undefined) {
+      validMoves = this.props.model.validMoves({ from: this.state.selectedSquare.code, computeNextBoard: true });
+    }
 
     const squares = [];
     for (let r = 0; r < this.props.model.rowCount; r++) {

@@ -29,7 +29,7 @@ class App extends React.Component<AppProps, AppState> {
         strategy: BoardAIPlayerStrategy.Greedy,
         turn: PieceColor.White,
         materialScores: this.board.getMaterialScores(),
-        gameState: this.board.computeGameState()
+        gameState: this.board.gameState
       }
     };
   }
@@ -53,7 +53,7 @@ class App extends React.Component<AppProps, AppState> {
       ...this.state.gameInfo,
       turn: (this.state.gameInfo.turn === PieceColor.White ? PieceColor.Black : PieceColor.White),
       materialScores: this.board.getMaterialScores(),
-      gameState: this.board.computeGameState()
+      gameState: this.board.gameState
     };
     this.setState(
       { gameInfo: newGameInfo },
