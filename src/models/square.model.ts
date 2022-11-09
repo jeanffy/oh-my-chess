@@ -1,7 +1,7 @@
 import { SquareCode } from './board-representation.model';
 
 export enum PieceKind {
-  Bishop = 'bishiop',
+  Bishop = 'bishop',
   King = 'king',
   Knight = 'knight',
   Pawn = 'pawn',

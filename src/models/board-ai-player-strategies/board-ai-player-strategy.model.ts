@@ -6,7 +6,6 @@ export abstract class BoardAIPlayerStrategyModel {
   }
 
   public async getNextMove(color: PieceColor): Promise<BoardValidMove> {
-    await new Promise(resolve => setTimeout(resolve, 500)); // to simulate some thinking
     return new Promise<BoardValidMove>((resolve, reject) => {
       const move = this.nextMove(color);
       if (move === undefined) {

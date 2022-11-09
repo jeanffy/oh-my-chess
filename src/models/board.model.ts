@@ -28,6 +28,10 @@ export interface BoardGameState {
   blackCheckmate: boolean;
 }
 
+export interface BoardGameStateNotations {
+  fen: string;
+}
+
 export interface PieceWithMoves {
   square: SquareModel;
   validMoves: BoardValidMove[];
@@ -37,7 +41,10 @@ export class BoardModel {
   public rowCount: number;
   public columnCount: number;
   public squares: SquareModel[][];
+  public turn: PieceColor;
+  public fullMoves: number;
   public gameState: BoardGameState;
+  public gameStateNotations: BoardGameStateNotations;
 
   public constructor(other?: BoardModel) {
     this.rowCount = (other !== undefined ? other.rowCount : 8);
@@ -75,22 +82,54 @@ export class BoardModel {
       this.squares[ci] = Array(this.rowCount).fill(undefined);
       for (let ri = 0; ri < this.rowCount; ri++) {
         if (other !== undefined) {
-          this.squares[ci][ri] = { code: other.squares[ci][ri].code, piece: other.squares[ci][ri].piece };
+          let piece: Piece | undefined;
+          const otherPiece = other.squares[ci][ri].piece;
+          if (otherPiece !== undefined) {
+            piece = {
+              kind: otherPiece.kind,
+              color: otherPiece.color,
+              strength: otherPiece.strength,
+              firstMove: otherPiece.firstMove
+            };
+          }
+          this.squares[ci][ri] = { code: other.squares[ci][ri].code, piece: piece };
         } else {
           this.squares[ci][ri] = { code: BoardRepresentationModel.indexToCode(ci, ri), piece: undefined };
         }
       }
     }
 
-    BoardInitModel.populateBoard(this);
+    if (other !== undefined) {
+      this.turn = other.turn;
+      this.fullMoves = other.fullMoves;
+      this.gameState = {
+        pat: other.gameState.pat,
+        whiteCheck: other.gameState.whiteCheck,
+        whiteCheckmate: other.gameState.whiteCheckmate,
+        blackCheck: other.gameState.blackCheck,
+        blackCheckmate: other.gameState.blackCheckmate
+      };
+      this.gameStateNotations = {
+        fen: other.gameStateNotations.fen
+      };
+    } else {
+      this.turn = PieceColor.White;
+      this.fullMoves = 0;
+      this.gameState = {
+        pat: false,
+        whiteCheck: false,
+        whiteCheckmate: false,
+        blackCheck: false,
+        blackCheckmate: false,
+      };
+      this.gameStateNotations = this.computeGameStateNotations();
+    }
+  }
 
-    this.gameState = (other !== undefined ? other.gameState : {
-      pat: false,
-      whiteCheck: false,
-      whiteCheckmate: false,
-      blackCheck: false,
-      blackCheckmate: false
-    });
+  public initWithFEN(fenNotation: string): void {
+    BoardInitModel.populateBoardWithFENNotation(this, fenNotation);
+    this.gameState = this.computeGameState();
+    this.gameStateNotations = this.computeGameStateNotations();
   }
 
   public cloneWithMove(move: BoardMove): BoardModel {
@@ -113,7 +152,7 @@ export class BoardModel {
     return this.squares[index.ci][index.ri];
   }
 
-  public squareAtEx(this: BoardModel, code: SquareCode, codeMove: CodeMove): SquareModel {
+  public squareAtEx(code: SquareCode, codeMove: CodeMove): SquareModel {
     return this.squareAt(code, codeMove.cm, codeMove.rm);
   }
 
@@ -137,6 +176,11 @@ export class BoardModel {
     squareFrom.piece = undefined;
 
     this.gameState = this.computeGameState();
+    this.turn = (this.turn === PieceColor.White ? PieceColor.Black : PieceColor.White);
+    if (this.turn === PieceColor.White) {
+      this.fullMoves++;
+    }
+    this.gameStateNotations = this.computeGameStateNotations();
 
     return taken;
   }
@@ -189,11 +233,11 @@ export class BoardModel {
     const blackCheck = whiteMoves.some(m => m.take?.kind === PieceKind.King);
     let whiteCheckmate = false;
     if (whiteCheck) {
-
+      // TODO: detect white checkmate
     }
     let blackCheckmate = false;
     if (blackCheck) {
-
+      // TODO: detect black checkmate
     }
     return {
       pat: false, // TODO: detect pat
@@ -201,6 +245,71 @@ export class BoardModel {
       whiteCheckmate: whiteCheckmate,
       blackCheck: blackCheck,
       blackCheckmate: blackCheckmate
+    };
+  }
+
+  protected computeGameStateNotations(): BoardGameStateNotations {
+    // based on https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+    let fen = '';
+    const fenLines: string[] = [];
+    for (let ri = 0; ri < this.rowCount; ri++) {
+      let fenLine = '';
+      let numberOfEmpty = 0;
+      for (let ci = 0; ci < this.columnCount; ci++) {
+        const square = this.squares[ci][ri];
+        if (square.piece === undefined) {
+          numberOfEmpty++;
+        } else {
+          if (numberOfEmpty > 0) {
+            fenLine += `${numberOfEmpty}`;
+            numberOfEmpty = 0;
+          }
+          switch (square.piece.color) {
+            case PieceColor.White:
+              switch (square.piece.kind) {
+                case PieceKind.Bishop: fenLine += 'B'; break;
+                case PieceKind.King: fenLine += 'K'; break;
+                case PieceKind.Knight: fenLine += 'N'; break;
+                case PieceKind.Pawn: fenLine += 'P'; break;
+                case PieceKind.Queen: fenLine += 'Q'; break;
+                case PieceKind.Rook: fenLine += 'R'; break;
+              }
+              break;
+            case PieceColor.Black:
+              switch (square.piece.kind) {
+                case PieceKind.Bishop: fenLine += 'b'; break;
+                case PieceKind.King: fenLine += 'k'; break;
+                case PieceKind.Knight: fenLine += 'n'; break;
+                case PieceKind.Pawn: fenLine += 'p'; break;
+                case PieceKind.Queen: fenLine += 'q'; break;
+                case PieceKind.Rook: fenLine += 'r'; break;
+              }
+              break;
+          }
+        }
+      }
+      if (numberOfEmpty > 0) {
+        fenLine += `${numberOfEmpty}`;
+      }
+      fenLines.push(fenLine);
+    }
+    fen += fenLines.join('/');
+    fen += ' ';
+    switch (this.turn) {
+      case PieceColor.White: fen += 'w'; break;
+      case PieceColor.Black: fen += 'b'; break;
+    }
+    fen += ' ';
+    fen += '(cs)';
+    fen += ' ';
+    fen += '(ep)';
+    fen += ' ';
+    fen += '(hm)';
+    fen += ' ';
+    fen += `${this.fullMoves}`;
+
+    return {
+      fen: fen
     };
   }
 }

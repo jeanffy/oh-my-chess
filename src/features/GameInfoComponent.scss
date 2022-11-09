@@ -2,9 +2,10 @@ div.game-info {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  flex-grow: 1;
 }
 
-.material-score, .check-state, .checkmate-state {
+.state, .material-score, .check-state, .checkmate-state {
   display: flex;
   gap: 15px;
 }
