@@ -8,7 +8,6 @@ import { SquareComponent } from './SquareComponent';
 
 export interface BoardActionEvent {
   move: BoardMove;
-  autoPlay: boolean;
 }
 
 export interface BoardActionDoneEvent {
@@ -77,8 +76,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
     const validMoves = this.props.model.validMoves({ from: this.state.selectedSquare.code, computeNextBoard: true });
     if (validMoves.map(m => m.to).includes(square.code)) {
       this.props.boardActionEvent.next({
-        move: { from: this.state.selectedSquare.code, to: square.code },
-        autoPlay: true
+        move: { from: this.state.selectedSquare.code, to: square.code }
       });
     }
   }
