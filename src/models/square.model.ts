@@ -9,14 +9,14 @@ export enum PieceKind {
   Rook = 'rook'
 }
 
-export enum PieceColor {
-  Black = 'b',
-  White = 'w'
+export enum PieceSide {
+  P1 = 'p1',
+  P2 = 'p2'
 }
 
 export interface Piece {
   kind: PieceKind;
-  color: PieceColor;
+  side: PieceSide;
   strength: number;
   firstMove: boolean;
 }

@@ -1,17 +1,17 @@
 import React from 'react';
-import { PieceColor, PieceKind, SquareModel } from '../models/square.model';
-import blackRook from '../icons/black/rook.svg';
-import blackKnight from '../icons/black/knight.svg';
-import blackBishop from '../icons/black/bishop.svg';
-import blackQueen from '../icons/black/queen.svg';
-import blackKing from '../icons/black/king.svg';
-import blackPawn from '../icons/black/pawn.svg';
-import whiteRook from '../icons/white/rook.svg';
-import whiteKnight from '../icons/white/knight.svg';
-import whiteBishop from '../icons/white/bishop.svg';
-import whiteQueen from '../icons/white/queen.svg';
-import whiteKing from '../icons/white/king.svg';
-import whitePawn from '../icons/white/pawn.svg';
+import { PieceSide, PieceKind, SquareModel } from '../models/square.model';
+import p1Rook from '../icons/green/rook.svg';
+import p1Knight from '../icons/green/knight.svg';
+import p1Bishop from '../icons/green/bishop.svg';
+import p1Queen from '../icons/green/queen.svg';
+import p1King from '../icons/green/king.svg';
+import p1Pawn from '../icons/green/pawn.svg';
+import p2Rook from '../icons/blue/rook.svg';
+import p2Knight from '../icons/blue/knight.svg';
+import p2Bishop from '../icons/blue/bishop.svg';
+import p2Queen from '../icons/blue/queen.svg';
+import p2King from '../icons/blue/king.svg';
+import p2Pawn from '../icons/blue/pawn.svg';
 import './SquareComponent.scss';
 
 export interface SquareComponentProps {
@@ -37,23 +37,23 @@ export class SquareComponent extends React.Component<SquareComponentProps> {
     }
 
     let imgSource;
-    if (piece.color === PieceColor.Black) {
+    if (piece.side === PieceSide.P2) {
       switch (piece.kind) {
-        case PieceKind.Bishop: imgSource = blackBishop; break;
-        case PieceKind.King: imgSource = blackKing; break;
-        case PieceKind.Knight: imgSource = blackKnight; break;
-        case PieceKind.Pawn: imgSource = blackPawn; break;
-        case PieceKind.Queen: imgSource = blackQueen; break;
-        case PieceKind.Rook: imgSource = blackRook; break;
+        case PieceKind.Bishop: imgSource = p2Bishop; break;
+        case PieceKind.King: imgSource = p2King; break;
+        case PieceKind.Knight: imgSource = p2Knight; break;
+        case PieceKind.Pawn: imgSource = p2Pawn; break;
+        case PieceKind.Queen: imgSource = p2Queen; break;
+        case PieceKind.Rook: imgSource = p2Rook; break;
       }
-    } else if (piece.color === PieceColor.White) {
+    } else if (piece.side === PieceSide.P1) {
       switch (piece.kind) {
-        case PieceKind.Bishop: imgSource = whiteBishop; break;
-        case PieceKind.King: imgSource = whiteKing; break;
-        case PieceKind.Knight: imgSource = whiteKnight; break;
-        case PieceKind.Pawn: imgSource = whitePawn; break;
-        case PieceKind.Queen: imgSource = whiteQueen; break;
-        case PieceKind.Rook: imgSource = whiteRook; break;
+        case PieceKind.Bishop: imgSource = p1Bishop; break;
+        case PieceKind.King: imgSource = p1King; break;
+        case PieceKind.Knight: imgSource = p1Knight; break;
+        case PieceKind.Pawn: imgSource = p1Pawn; break;
+        case PieceKind.Queen: imgSource = p1Queen; break;
+        case PieceKind.Rook: imgSource = p1Rook; break;
       }
     }
     if (imgSource === undefined) {

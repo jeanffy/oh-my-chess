@@ -20,19 +20,19 @@ The game is not in a playable status right now.
 
 Not sorted:
 
-- forbid a move that would put the player (or AI) into a check or checkmate state
-- detect checkmate state
-- detect pat state
+- detect [stalemate](https://en.wikipedia.org/wiki/Stalemate) state
+- detect [draw](https://en.wikipedia.org/wiki/Draw_(chess)) state
 - handle end of game
-- handle "en passant" move
-- handle castling
+- handle "[en passant](https://en.wikipedia.org/wiki/En_passant)" move
+- handle [castling](https://en.wikipedia.org/wiki/Castling)
 - finish FEN notation handling (castling, en passant, half moves)
 - implement [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess))
 - implement undo move(s)
 - highlight last move played
-- handle pawn promotion
+- handle pawn [promotion](https://en.wikipedia.org/wiki/Promotion_(chess))
 - implement a mecanism to allow user to enter FEN starting position
+- detect [pure mate](https://en.wikipedia.org/wiki/Pure_mate) state
 
 ## Known bugs
 
-With FEN `rnbqkb2/ppp1pppr/3p4/1B6/4P3/5PP1/PPPP4/RNBQK1N1 b (cs) (ep) (hm) 5`, the AI says "no move possible"
+Sometimes the console log can say `no move possible` whereas there is cleary some valid moves possible -> TODO: analyze console logs in that situation

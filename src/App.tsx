@@ -6,15 +6,15 @@ import { BoardAIPlayerModel, BoardAIPlayerStrategy } from './models/board-ai-pla
 import { BoardModel } from './models/board.model';
 import { GameInfoComponent } from './features/GameInfoComponent';
 import { Subject, tap } from 'rxjs';
-import { PieceColor } from './models/square.model';
+import { PieceSide } from './models/square.model';
 import { Button, Checkbox, FormControlLabel } from '@mui/material';
 
 interface AppProps {
 }
 
 interface AppState {
-  whiteAutoplay: boolean;
-  blackAutoplay: boolean;
+  p1Autoplay: boolean;
+  p2Autoplay: boolean;
   gameInfo: GameInfoModel;
 }
 
@@ -29,14 +29,17 @@ class App extends React.Component<AppProps, AppState> {
     super(props);
 
     this.board = new BoardModel();
-    this.board.initWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    //this.board.initWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    this.board.initWithFEN('r1bqk3/p2p1p2/2p3NQ/4p3/1p2P3/2P2P2/PP1P1P1P/RNB1KB1R w (cs) (ep) (hm) 12');
+    //this.board.initWithFEN('8/8/8/8/8/8/2q5/K7 w KQkq - 0 1');
+    //this.board.initWithFEN('2b3n1/Qppk2p1/2npp3/1B6/8/2NP2P1/PP3q2/R1K5 b (cs) (ep) (hm) 18');
     this.aiPlayer = new BoardAIPlayerModel(this.board);
 
     this.state = {
-      whiteAutoplay: false,
-      blackAutoplay: true,
+      p1Autoplay: false,
+      p2Autoplay: true,
       gameInfo: {
-        strategy: BoardAIPlayerStrategy.Greedy,
+        strategy: BoardAIPlayerStrategy.Random,
         turn: this.board.turn,
         materialScores: this.board.getMaterialScores(),
         gameState: this.board.gameState,
@@ -44,7 +47,7 @@ class App extends React.Component<AppProps, AppState> {
       }
     };
 
-    if (this.state.gameInfo.turn === PieceColor.Black) {
+    if (this.state.gameInfo.turn === PieceSide.P2) {
       this.doAIPlayerMove();
     }
   }
@@ -56,9 +59,10 @@ class App extends React.Component<AppProps, AppState> {
 
   public onBoardAction(e: BoardActionEvent): void {
     const taken = this.board.move(e.move);
+    this.board.updateState();
     this.boardActionDoneEvent.next({
       move: e.move,
-      autoPlay: (this.state.gameInfo.turn === PieceColor.White ? this.state.blackAutoplay : this.state.whiteAutoplay),
+      autoPlay: (this.state.gameInfo.turn === PieceSide.P1 ? this.state.p2Autoplay : this.state.p1Autoplay),
       taken: taken
     });
   }
@@ -77,14 +81,14 @@ class App extends React.Component<AppProps, AppState> {
     );
   }
 
-  private onWhiteAutoplayChanged(event: React.SyntheticEvent<Element, Event>): void {
+  private onP1AutoplayChanged(event: React.SyntheticEvent<Element, Event>): void {
     const checkboxInput = event.target as HTMLInputElement;
-    this.setState({ whiteAutoplay: checkboxInput.checked });
+    this.setState({ p1Autoplay: checkboxInput.checked });
   }
 
-  private onBlackAutoplayChanged(event: React.SyntheticEvent<Element, Event>): void {
+  private onP2AutoplayChanged(event: React.SyntheticEvent<Element, Event>): void {
     const checkboxInput = event.target as HTMLInputElement;
-    this.setState({ blackAutoplay: checkboxInput.checked });
+    this.setState({ p2Autoplay: checkboxInput.checked });
   }
 
   private onPlayAIMoveClicked(): void {
@@ -92,9 +96,12 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   private async doAIPlayerMove(): Promise<void> {
-    const aiPlayerMove = await this.aiPlayer.getNextMove(this.state.gameInfo.turn, this.state.gameInfo.strategy);
-    this.boardActionEvent.next({
-      move: aiPlayerMove
+    // we use a timeout of 1 to allow UI to refresh
+    setTimeout(async () => {
+      const aiPlayerMove = await this.aiPlayer.getNextMove(this.state.gameInfo.turn, this.state.gameInfo.strategy);
+      this.boardActionEvent.next({
+        move: aiPlayerMove
+      });
     });
   }
 
@@ -103,13 +110,13 @@ class App extends React.Component<AppProps, AppState> {
       <div className="App">
         <div className="actions">
           <FormControlLabel
-            control={<Checkbox checked={this.state.whiteAutoplay}/>}
-            label="Autoplay white"
-            onChange={(e) => this.onWhiteAutoplayChanged(e)}/>
+            control={<Checkbox checked={this.state.p1Autoplay}/>}
+            label="Autoplay P1"
+            onChange={(e) => this.onP1AutoplayChanged(e)}/>
           <FormControlLabel
-            control={<Checkbox checked={this.state.blackAutoplay}/>}
-            label="Autoplay black"
-            onChange={(e) => this.onBlackAutoplayChanged(e)}/>
+            control={<Checkbox checked={this.state.p2Autoplay}/>}
+            label="Autoplay P2"
+            onChange={(e) => this.onP2AutoplayChanged(e)}/>
           <Button variant="outlined" onClick={() => this.onPlayAIMoveClicked()}>Play AI move</Button>
         </div>
         <div className="board">

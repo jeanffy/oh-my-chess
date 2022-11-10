@@ -1,6 +1,7 @@
 import React from 'react';
 import { Subject, Subscription, tap } from 'rxjs';
-import {  BoardModel, BoardMove, BoardValidMove } from '../models/board.model';
+import { BoardMove, BoardMovesModel, BoardValidMove } from '../models/board-moves.model';
+import {  BoardModel } from '../models/board.model';
 import { GameInfoModel } from '../models/game-info.model';
 import { Piece, SquareModel } from '../models/square.model';
 import './BoardComponent.scss';
@@ -48,7 +49,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
   }
 
   private onSquareClicked(square: SquareModel): void {
-    if (this.state.selectedSquare === undefined && square.piece !== undefined && square.piece.color !== this.props.gameInfo.turn) {
+    if (this.state.selectedSquare === undefined && square.piece !== undefined && square.piece.side !== this.props.gameInfo.turn) {
       return;
     }
 
@@ -60,23 +61,29 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
       return;
     }
 
+    const selectedSquare = this.state.selectedSquare;
+    if (selectedSquare.piece === undefined) {
+      // this should not happen
+      return;
+    }
+
     // same piece already selected -> unselect
-    if (square.code === this.state.selectedSquare.code) {
+    if (square.code === selectedSquare.code) {
       this.setState({ selectedSquare: undefined });
       return;
     }
 
     // if another piece of same color is clicked -> change selection
-    if (square.piece !== undefined && square.piece.color === this.state.selectedSquare.piece?.color) {
+    if (square.piece !== undefined && square.piece.side === selectedSquare.piece.side) {
       this.setState({ selectedSquare: square });
       return;
     }
 
     // another piece already selected -> move
-    const validMoves = this.props.model.validMoves({ from: this.state.selectedSquare.code, computeNextBoard: true });
+    const validMoves = BoardMovesModel.validMoves(this.props.model, { from: selectedSquare.code });
     if (validMoves.map(m => m.to).includes(square.code)) {
       this.props.boardActionEvent.next({
-        move: { from: this.state.selectedSquare.code, to: square.code }
+        move: { fromPiece: selectedSquare.piece, from: selectedSquare.code, to: square.code }
       });
     }
   }
@@ -88,7 +95,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
   public render(): React.ReactNode {
     let validMoves: BoardValidMove[] = [];
     if (this.state.selectedSquare !== undefined) {
-      validMoves = this.props.model.validMoves({ from: this.state.selectedSquare.code, computeNextBoard: true });
+      validMoves = BoardMovesModel.validMoves(this.props.model, { from: this.state.selectedSquare.code });
     }
 
     const squares = [];

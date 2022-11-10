@@ -1,11 +1,12 @@
 import { BoardAIPlayerStrategy } from './board-ai-player.model';
-import { BoardGameState, BoardGameStateNotations, BoardMaterialScores } from './board.model';
-import { PieceColor } from './square.model';
+import { BoardState } from './board-state.model';
+import { BoardGameStateNotations, BoardMaterialScores } from './board.model';
+import { PieceSide } from './square.model';
 
 export interface GameInfoModel {
   strategy: BoardAIPlayerStrategy;
-  turn: PieceColor;
+  turn: PieceSide;
   materialScores: BoardMaterialScores;
-  gameState: BoardGameState;
+  gameState: BoardState;
   gameStateNotations: BoardGameStateNotations;
 }

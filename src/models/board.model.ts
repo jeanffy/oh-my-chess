@@ -1,49 +1,33 @@
 import { BoardInitModel } from './board-init.model';
-import { BoardValidMovesModel } from './board-valid-moves.model';
+import { BoardMove, BoardMovesModel, BoardValidMove as BoardPossibleMove } from './board-moves.model';
+import { BoardNotationsModel } from './board-notations.model';
 import { BoardRepresentationModel, CodeMove, SquareCode, SquareIndex } from './board-representation.model';
-import { Piece, PieceColor, PieceKind, SquareModel } from './square.model';
+import { BoardState, BoardStateModel } from './board-state.model';
+import { Piece, PieceSide, PieceKind, SquareModel } from './square.model';
 
 export interface BoardMaterialScores {
-  white: number;
-  black: number;
-}
-
-export interface BoardMove {
-  from: SquareCode;
-  to: SquareCode;
-}
-
-export interface BoardValidMove extends BoardMove {
-  take?: Piece;
-  nextBoard: BoardModel;
+  p1: number;
+  p2: number;
 }
 
 export type BoardSquareCallback = (square: SquareModel, index: SquareIndex) => void;
-
-export interface BoardGameState {
-  pat: false;
-  whiteCheck: boolean;
-  whiteCheckmate: boolean;
-  blackCheck: boolean;
-  blackCheckmate: boolean;
-}
 
 export interface BoardGameStateNotations {
   fen: string;
 }
 
-export interface PieceWithMoves {
+export interface PieceWithPossibleMoves {
   square: SquareModel;
-  validMoves: BoardValidMove[];
+  possibleMoves: BoardPossibleMove[];
 }
 
 export class BoardModel {
   public rowCount: number;
   public columnCount: number;
   public squares: SquareModel[][];
-  public turn: PieceColor;
+  public turn: PieceSide;
   public fullMoves: number;
-  public gameState: BoardGameState;
+  public gameState: BoardState;
   public gameStateNotations: BoardGameStateNotations;
 
   public constructor(other?: BoardModel) {
@@ -87,7 +71,7 @@ export class BoardModel {
           if (otherPiece !== undefined) {
             piece = {
               kind: otherPiece.kind,
-              color: otherPiece.color,
+              side: otherPiece.side,
               strength: otherPiece.strength,
               firstMove: otherPiece.firstMove
             };
@@ -103,33 +87,37 @@ export class BoardModel {
       this.turn = other.turn;
       this.fullMoves = other.fullMoves;
       this.gameState = {
-        pat: other.gameState.pat,
-        whiteCheck: other.gameState.whiteCheck,
-        whiteCheckmate: other.gameState.whiteCheckmate,
-        blackCheck: other.gameState.blackCheck,
-        blackCheckmate: other.gameState.blackCheckmate
+        stalemate: other.gameState.stalemate,
+        p1Check: other.gameState.p1Check,
+        p1Checkmate: other.gameState.p1Checkmate,
+        p2Check: other.gameState.p2Check,
+        p2Checkmate: other.gameState.p2Checkmate
       };
       this.gameStateNotations = {
         fen: other.gameStateNotations.fen
       };
     } else {
-      this.turn = PieceColor.White;
+      this.turn = PieceSide.P1;
       this.fullMoves = 0;
       this.gameState = {
-        pat: false,
-        whiteCheck: false,
-        whiteCheckmate: false,
-        blackCheck: false,
-        blackCheckmate: false,
+        stalemate: false,
+        p1Check: false,
+        p1Checkmate: false,
+        p2Check: false,
+        p2Checkmate: false,
       };
-      this.gameStateNotations = this.computeGameStateNotations();
+      this.gameStateNotations = {
+        fen: BoardNotationsModel.getFENNotation(this)
+      };
     }
   }
 
   public initWithFEN(fenNotation: string): void {
     BoardInitModel.populateBoardWithFENNotation(this, fenNotation);
-    this.gameState = this.computeGameState();
-    this.gameStateNotations = this.computeGameStateNotations();
+    this.gameState = BoardStateModel.computeState(this);
+    this.gameStateNotations = {
+      fen: BoardNotationsModel.getFENNotation(this)
+    };
   }
 
   public cloneWithMove(move: BoardMove): BoardModel {
@@ -156,8 +144,6 @@ export class BoardModel {
     return this.squareAt(code, codeMove.cm, codeMove.rm);
   }
 
-  public validMoves = BoardValidMovesModel.validMoves;
-
   public move(move: BoardMove): Piece | undefined {
     const squareFrom = this.squareAt(move.from);
     if (squareFrom.piece === undefined) {
@@ -175,17 +161,24 @@ export class BoardModel {
     squareTo.piece.firstMove = false;
     squareFrom.piece = undefined;
 
-    this.gameState = this.computeGameState();
-    this.turn = (this.turn === PieceColor.White ? PieceColor.Black : PieceColor.White);
-    if (this.turn === PieceColor.White) {
+    // this.gameState is updated in a separate call
+
+    this.turn = (this.turn === PieceSide.P1 ? PieceSide.P2 : PieceSide.P1);
+    if (this.turn === PieceSide.P1) {
       this.fullMoves++;
     }
-    this.gameStateNotations = this.computeGameStateNotations();
+    this.gameStateNotations = {
+      fen: BoardNotationsModel.getFENNotation(this)
+    };
 
     return taken;
   }
 
-  public setSquare(code: SquareCode, kind: PieceKind, color: PieceColor, strength: number): void {
+  public updateState(): void {
+    this.gameState = BoardStateModel.computeState(this);
+  }
+
+  public setSquare(code: SquareCode, kind: PieceKind, color: PieceSide, strength: number): void {
     const index = BoardRepresentationModel.codeToIndex(code);
     if (!BoardRepresentationModel.isValidIndex(index)) {
       throw new Error(`invalid code '${code}'`);
@@ -194,7 +187,7 @@ export class BoardModel {
       code: code,
       piece: {
         kind: kind,
-        color: color,
+        side: color,
         strength: strength,
         firstMove: true
       }
@@ -202,114 +195,27 @@ export class BoardModel {
   }
 
   public getMaterialScores(): BoardMaterialScores {
-    const scores: BoardMaterialScores = { white: 0, black: 0 };
+    const scores: BoardMaterialScores = { p1: 0, p2: 0 };
     this.forEachSquare(square => {
       if (square.piece !== undefined) {
-        switch (square.piece.color) {
-          case PieceColor.White: scores.white += square.piece.strength; break;
-          case PieceColor.Black: scores.black += square.piece.strength; break;
+        switch (square.piece.side) {
+          case PieceSide.P1: scores.p1 += square.piece.strength; break;
+          case PieceSide.P2: scores.p2 += square.piece.strength; break;
         }
       }
     });
     return scores;
   }
 
-  public getAllPiecesWithValidMoves(color: PieceColor, computeNextBoard: boolean): PieceWithMoves[] {
+  public getAllPiecesWithPossibleMoves(color: PieceSide): PieceWithPossibleMoves[] {
     const allPieces: SquareModel[] = [];
     this.forEachSquare(square => {
-      if (square.piece !== undefined && square.piece.color === color) {
+      if (square.piece !== undefined && square.piece.side === color) {
         allPieces.push(square);
       }
     });
     return allPieces
-      .map(p => ({ square: p, validMoves: this.validMoves({ from: p.code, computeNextBoard: computeNextBoard }) }))
-      .filter(p => p.validMoves.length > 0);
-  }
-
-  protected computeGameState(): BoardGameState {
-    const whiteMoves = this.getAllPiecesWithValidMoves(PieceColor.White, false).flatMap(p => p.validMoves);
-    const blackMoves = this.getAllPiecesWithValidMoves(PieceColor.Black, false).flatMap(p => p.validMoves);
-    const whiteCheck = blackMoves.some(m => m.take?.kind === PieceKind.King);
-    const blackCheck = whiteMoves.some(m => m.take?.kind === PieceKind.King);
-    let whiteCheckmate = false;
-    if (whiteCheck) {
-      // TODO: detect white checkmate
-    }
-    let blackCheckmate = false;
-    if (blackCheck) {
-      // TODO: detect black checkmate
-    }
-    return {
-      pat: false, // TODO: detect pat
-      whiteCheck: whiteCheck,
-      whiteCheckmate: whiteCheckmate,
-      blackCheck: blackCheck,
-      blackCheckmate: blackCheckmate
-    };
-  }
-
-  protected computeGameStateNotations(): BoardGameStateNotations {
-    // based on https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
-    let fen = '';
-    const fenLines: string[] = [];
-    for (let ri = 0; ri < this.rowCount; ri++) {
-      let fenLine = '';
-      let numberOfEmpty = 0;
-      for (let ci = 0; ci < this.columnCount; ci++) {
-        const square = this.squares[ci][ri];
-        if (square.piece === undefined) {
-          numberOfEmpty++;
-        } else {
-          if (numberOfEmpty > 0) {
-            fenLine += `${numberOfEmpty}`;
-            numberOfEmpty = 0;
-          }
-          switch (square.piece.color) {
-            case PieceColor.White:
-              switch (square.piece.kind) {
-                case PieceKind.Bishop: fenLine += 'B'; break;
-                case PieceKind.King: fenLine += 'K'; break;
-                case PieceKind.Knight: fenLine += 'N'; break;
-                case PieceKind.Pawn: fenLine += 'P'; break;
-                case PieceKind.Queen: fenLine += 'Q'; break;
-                case PieceKind.Rook: fenLine += 'R'; break;
-              }
-              break;
-            case PieceColor.Black:
-              switch (square.piece.kind) {
-                case PieceKind.Bishop: fenLine += 'b'; break;
-                case PieceKind.King: fenLine += 'k'; break;
-                case PieceKind.Knight: fenLine += 'n'; break;
-                case PieceKind.Pawn: fenLine += 'p'; break;
-                case PieceKind.Queen: fenLine += 'q'; break;
-                case PieceKind.Rook: fenLine += 'r'; break;
-              }
-              break;
-          }
-        }
-      }
-      if (numberOfEmpty > 0) {
-        fenLine += `${numberOfEmpty}`;
-      }
-      fenLines.push(fenLine);
-    }
-    fen += fenLines.join('/');
-    fen += ' ';
-    switch (this.turn) {
-      case PieceColor.White: fen += 'w'; break;
-      case PieceColor.Black: fen += 'b'; break;
-    }
-    fen += ' ';
-    fen += '(cs)';
-    fen += ' ';
-    fen += '(ep)';
-    fen += ' ';
-    fen += '(hm)';
-    fen += ' ';
-    fen += `${this.fullMoves}`;
-
-    return {
-      fen: fen
-    };
+      .map(p => ({ square: p, possibleMoves: BoardMovesModel.possibleMoves(this, { from: p.code }) }) as PieceWithPossibleMoves)
+      .filter(p => p.possibleMoves.length > 0);
   }
 }
