@@ -22,11 +22,14 @@ export interface PieceWithPossibleMoves {
 }
 
 export class BoardModel {
+  public isClone = false;
+
   public rowCount: number;
   public columnCount: number;
   public squares: SquareModel[][];
   public turn: PieceSide;
   public fullMoves: number;
+  public halfMoves: number;
   public gameState: BoardState;
   public gameStateNotations: BoardGameStateNotations;
 
@@ -86,6 +89,7 @@ export class BoardModel {
     if (other !== undefined) {
       this.turn = other.turn;
       this.fullMoves = other.fullMoves;
+      this.halfMoves = other.halfMoves;
       this.gameState = {
         stalemate: other.gameState.stalemate,
         p1Check: other.gameState.p1Check,
@@ -99,6 +103,7 @@ export class BoardModel {
     } else {
       this.turn = PieceSide.P1;
       this.fullMoves = 0;
+      this.halfMoves = 0;
       this.gameState = {
         stalemate: false,
         p1Check: false,
@@ -122,6 +127,7 @@ export class BoardModel {
 
   public cloneWithMove(move: BoardMove): BoardModel {
     const clone = new BoardModel(this);
+    clone.isClone = true;
     clone.move(move);
     return clone;
   }
@@ -150,28 +156,37 @@ export class BoardModel {
       return undefined;
     }
 
-    let taken: Piece | undefined;
+    const movingPiece = squareFrom.piece;
+
+    let takenPiece: Piece | undefined;
 
     const squareTo = this.squareAt(move.to);
     if (squareTo.piece !== undefined) {
-      taken = squareFrom.piece;
+      takenPiece = squareFrom.piece;
     }
 
-    squareTo.piece = squareFrom.piece;
+    squareTo.piece = movingPiece;
     squareTo.piece.firstMove = false;
     squareFrom.piece = undefined;
 
     // this.gameState is updated in a separate call
 
     this.turn = (this.turn === PieceSide.P1 ? PieceSide.P2 : PieceSide.P1);
+
     if (this.turn === PieceSide.P1) {
       this.fullMoves++;
     }
+
+    this.halfMoves++;
+    if (takenPiece !== undefined || movingPiece.kind === PieceKind.Pawn) {
+      this.halfMoves = 0;
+    }
+
     this.gameStateNotations = {
       fen: BoardNotationsModel.getFENNotation(this)
     };
 
-    return taken;
+    return takenPiece;
   }
 
   public updateState(): void {

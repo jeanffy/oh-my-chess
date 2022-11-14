@@ -25,7 +25,7 @@ Not sorted:
 - handle end of game
 - handle "[en passant](https://en.wikipedia.org/wiki/En_passant)" move
 - handle [castling](https://en.wikipedia.org/wiki/Castling)
-- finish FEN notation handling (castling, en passant, half moves)
+- finish FEN notation handling (castling, en passant)
 - implement [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess))
 - implement undo move(s)
 - highlight last move played

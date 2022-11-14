@@ -58,7 +58,7 @@ export namespace BoardNotationsModel {
     fen += ' ';
     fen += '(ep)';
     fen += ' ';
-    fen += '(hm)';
+    fen += `${board.halfMoves}`;
     fen += ' ';
     fen += `${board.fullMoves}`;
     return fen;
