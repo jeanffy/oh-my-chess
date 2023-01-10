@@ -2,19 +2,19 @@ import React from 'react';
 import './App.scss';
 import { GameInfoModel } from './models/game-info.model';
 import { BoardComponent, BoardActionEvent, BoardActionDoneEvent } from './features/BoardComponent';
-import { BoardAIPlayerModel, BoardAIPlayerStrategy } from './models/board-ai-player.model';
-import { BoardModel } from './models/board.model';
+import { BoardAIPlayerModel, BoardAIPlayerStrategy } from './models/board/board-ai-player.model';
+import { BoardModel } from './models/board/board.model';
 import { GameInfoComponent } from './features/GameInfoComponent';
 import { Subject, tap } from 'rxjs';
 import { PieceSide } from './models/square.model';
-import { Button, Checkbox, FormControlLabel } from '@mui/material';
+import { GameControlsComponent } from './features/GameControlsComponent';
 
 interface AppProps {
 }
 
 interface AppState {
-  p1Autoplay: boolean;
-  p2Autoplay: boolean;
+  player1Autoplay: boolean;
+  player2Autoplay: boolean;
   gameInfo: GameInfoModel;
 }
 
@@ -29,15 +29,16 @@ class App extends React.Component<AppProps, AppState> {
     super(props);
 
     this.board = new BoardModel();
+    this.board.initWithFEN('1R6/7k/7p/8/6Q1/P7/8/8 w KQkq - 0 34');
     //this.board.initWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
-    this.board.initWithFEN('r1bqk3/p2p1p2/2p3NQ/4p3/1p2P3/2P2P2/PP1P1P1P/RNB1KB1R w (cs) (ep) (hm) 12');
+    //this.board.initWithFEN('r1bqk3/p2p1p2/2p3NQ/4p3/1p2P3/2P2P2/PP1P1P1P/RNB1KB1R w (cs) (ep) (hm) 12');
     //this.board.initWithFEN('8/8/8/8/8/8/2q5/K7 w KQkq - 0 1');
     //this.board.initWithFEN('2b3n1/Qppk2p1/2npp3/1B6/8/2NP2P1/PP3q2/R1K5 b (cs) (ep) (hm) 18');
     this.aiPlayer = new BoardAIPlayerModel(this.board);
 
     this.state = {
-      p1Autoplay: false,
-      p2Autoplay: true,
+      player1Autoplay: false,
+      player2Autoplay: true,
       gameInfo: {
         strategy: BoardAIPlayerStrategy.Random,
         turn: this.board.turn,
@@ -47,7 +48,7 @@ class App extends React.Component<AppProps, AppState> {
       }
     };
 
-    if (this.state.gameInfo.turn === PieceSide.P2) {
+    if (this.state.gameInfo.turn === PieceSide.Player2) {
       this.doAIPlayerMove();
     }
   }
@@ -62,7 +63,7 @@ class App extends React.Component<AppProps, AppState> {
     this.board.updateState();
     this.boardActionDoneEvent.next({
       move: e.move,
-      autoPlay: (this.state.gameInfo.turn === PieceSide.P1 ? this.state.p2Autoplay : this.state.p1Autoplay),
+      autoPlay: (this.state.gameInfo.turn === PieceSide.Player1 ? this.state.player2Autoplay : this.state.player1Autoplay),
       taken: taken
     });
   }
@@ -81,20 +82,6 @@ class App extends React.Component<AppProps, AppState> {
     );
   }
 
-  private onP1AutoplayChanged(event: React.SyntheticEvent<Element, Event>): void {
-    const checkboxInput = event.target as HTMLInputElement;
-    this.setState({ p1Autoplay: checkboxInput.checked });
-  }
-
-  private onP2AutoplayChanged(event: React.SyntheticEvent<Element, Event>): void {
-    const checkboxInput = event.target as HTMLInputElement;
-    this.setState({ p2Autoplay: checkboxInput.checked });
-  }
-
-  private onPlayAIMoveClicked(): void {
-    this.doAIPlayerMove();
-  }
-
   private async doAIPlayerMove(): Promise<void> {
     // we use a timeout of 1 to allow UI to refresh
     setTimeout(async () => {
@@ -108,16 +95,14 @@ class App extends React.Component<AppProps, AppState> {
   public render() {
     return (
       <div className="App">
-        <div className="actions">
-          <FormControlLabel
-            control={<Checkbox checked={this.state.p1Autoplay}/>}
-            label="Autoplay P1"
-            onChange={(e) => this.onP1AutoplayChanged(e)}/>
-          <FormControlLabel
-            control={<Checkbox checked={this.state.p2Autoplay}/>}
-            label="Autoplay P2"
-            onChange={(e) => this.onP2AutoplayChanged(e)}/>
-          <Button variant="outlined" onClick={() => this.onPlayAIMoveClicked()}>Play AI move</Button>
+        <div className="controls">
+          <GameControlsComponent
+            player1Autoplay={this.state.player1Autoplay}
+            player2Autoplay={this.state.player2Autoplay}
+            onPlayer1AutoChanged={checked => this.setState({ player1Autoplay: checked })}
+            onPlayer2AutoChanged={checked => this.setState({ player2Autoplay: checked })}
+            onPlayAIMoveClicked={this.doAIPlayerMove.bind(this)}
+          />
         </div>
         <div className="board">
           <BoardComponent

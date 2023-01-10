@@ -1,6 +1,6 @@
 import { BoardMovesModel, BoardValidMove } from '../board-moves.model';
 import { BoardModel } from '../board.model';
-import { PieceSide } from '../square.model';
+import { PieceSide } from '../../square.model';
 import { BoardAIPlayerStrategyRandomModel } from './board-ai-player-strategy-random.model';
 import { BoardAIPlayerStrategyModel } from './board-ai-player-strategy.model';
 
@@ -33,7 +33,7 @@ export class BoardAIPlayerStrategyGreedyModel extends BoardAIPlayerStrategyModel
       return highestMove;
     }
     console.log('greedy highestMove not found -> using random');
-    // if no move take a piece, just use random strategy as a fallback
+    // if no move takes a piece, just use random strategy as a fallback
     return new BoardAIPlayerStrategyRandomModel(this.board).nextMove(color);
   }
 }

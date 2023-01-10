@@ -1,4 +1,4 @@
-import { SquareCode } from './board-representation.model';
+import { SquareCode } from './board/board-representation.model';
 
 export enum PieceKind {
   Bishop = 'bishop',
@@ -9,16 +9,17 @@ export enum PieceKind {
   Rook = 'rook'
 }
 
+// player1 starts at the bottom of the board
+// player2 starts at the top of the board
 export enum PieceSide {
-  P1 = 'p1',
-  P2 = 'p2'
+  Player1 = 'player1',
+  Player2 = 'player2'
 }
 
 export interface Piece {
   kind: PieceKind;
   side: PieceSide;
   strength: number;
-  firstMove: boolean;
 }
 
 export interface SquareModel {

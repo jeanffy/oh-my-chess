@@ -1,6 +1,6 @@
 import { BoardValidMove } from '../board-moves.model';
 import { BoardModel } from '../board.model';
-import { PieceSide } from '../square.model';
+import { PieceSide } from '../../square.model';
 
 export abstract class BoardAIPlayerStrategyModel {
   public constructor(protected board: BoardModel) {

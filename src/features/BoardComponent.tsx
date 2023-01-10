@@ -1,7 +1,7 @@
 import React from 'react';
 import { Subject, Subscription, tap } from 'rxjs';
-import { BoardMove, BoardMovesModel, BoardValidMove } from '../models/board-moves.model';
-import {  BoardModel } from '../models/board.model';
+import { BoardMove, BoardMovesModel, BoardValidMove } from '../models/board/board-moves.model';
+import {  BoardModel } from '../models/board/board.model';
 import { GameInfoModel } from '../models/game-info.model';
 import { Piece, SquareModel } from '../models/square.model';
 import './BoardComponent.scss';

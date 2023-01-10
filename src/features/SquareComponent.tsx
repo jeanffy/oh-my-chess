@@ -1,17 +1,17 @@
 import React from 'react';
 import { PieceSide, PieceKind, SquareModel } from '../models/square.model';
-import p1Rook from '../icons/green/rook.svg';
-import p1Knight from '../icons/green/knight.svg';
-import p1Bishop from '../icons/green/bishop.svg';
-import p1Queen from '../icons/green/queen.svg';
-import p1King from '../icons/green/king.svg';
-import p1Pawn from '../icons/green/pawn.svg';
-import p2Rook from '../icons/blue/rook.svg';
-import p2Knight from '../icons/blue/knight.svg';
-import p2Bishop from '../icons/blue/bishop.svg';
-import p2Queen from '../icons/blue/queen.svg';
-import p2King from '../icons/blue/king.svg';
-import p2Pawn from '../icons/blue/pawn.svg';
+import player1Rook from '../assets/images/pieces/green/rook.svg';
+import player1Knight from '../assets/images/pieces/green/knight.svg';
+import player1Bishop from '../assets/images/pieces/green/bishop.svg';
+import player1Queen from '../assets/images/pieces/green/queen.svg';
+import player1King from '../assets/images/pieces/green/king.svg';
+import player1Pawn from '../assets/images/pieces/green/pawn.svg';
+import player2Rook from '../assets/images/pieces/blue/rook.svg';
+import player2Knight from '../assets/images/pieces/blue/knight.svg';
+import player2Bishop from '../assets/images/pieces/blue/bishop.svg';
+import player2Queen from '../assets/images/pieces/blue/queen.svg';
+import player2King from '../assets/images/pieces/blue/king.svg';
+import player2Pawn from '../assets/images/pieces/blue/pawn.svg';
 import './SquareComponent.scss';
 
 export interface SquareComponentProps {
@@ -37,23 +37,23 @@ export class SquareComponent extends React.Component<SquareComponentProps> {
     }
 
     let imgSource;
-    if (piece.side === PieceSide.P2) {
+    if (piece.side === PieceSide.Player2) {
       switch (piece.kind) {
-        case PieceKind.Bishop: imgSource = p2Bishop; break;
-        case PieceKind.King: imgSource = p2King; break;
-        case PieceKind.Knight: imgSource = p2Knight; break;
-        case PieceKind.Pawn: imgSource = p2Pawn; break;
-        case PieceKind.Queen: imgSource = p2Queen; break;
-        case PieceKind.Rook: imgSource = p2Rook; break;
+        case PieceKind.Bishop: imgSource = player2Bishop; break;
+        case PieceKind.King: imgSource = player2King; break;
+        case PieceKind.Knight: imgSource = player2Knight; break;
+        case PieceKind.Pawn: imgSource = player2Pawn; break;
+        case PieceKind.Queen: imgSource = player2Queen; break;
+        case PieceKind.Rook: imgSource = player2Rook; break;
       }
-    } else if (piece.side === PieceSide.P1) {
+    } else if (piece.side === PieceSide.Player1) {
       switch (piece.kind) {
-        case PieceKind.Bishop: imgSource = p1Bishop; break;
-        case PieceKind.King: imgSource = p1King; break;
-        case PieceKind.Knight: imgSource = p1Knight; break;
-        case PieceKind.Pawn: imgSource = p1Pawn; break;
-        case PieceKind.Queen: imgSource = p1Queen; break;
-        case PieceKind.Rook: imgSource = p1Rook; break;
+        case PieceKind.Bishop: imgSource = player1Bishop; break;
+        case PieceKind.King: imgSource = player1King; break;
+        case PieceKind.Knight: imgSource = player1Knight; break;
+        case PieceKind.Pawn: imgSource = player1Pawn; break;
+        case PieceKind.Queen: imgSource = player1Queen; break;
+        case PieceKind.Rook: imgSource = player1Rook; break;
       }
     }
     if (imgSource === undefined) {

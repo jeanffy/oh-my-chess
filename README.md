@@ -8,7 +8,12 @@ Performance is not (maybe yet) at stake here.
 
 ## Status
 
-The game is not in a playable status right now.
+The game is in a almost-playable state right now, the followinf is not handled:
+
+- castling
+- pawn promotion
+- "en passant"
+- no proper end of game handling
 
 ## Technical info
 

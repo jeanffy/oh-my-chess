@@ -3,11 +3,11 @@ import { BoardMove, BoardMovesModel, BoardValidMove as BoardPossibleMove } from 
 import { BoardNotationsModel } from './board-notations.model';
 import { BoardRepresentationModel, CodeMove, SquareCode, SquareIndex } from './board-representation.model';
 import { BoardState, BoardStateModel } from './board-state.model';
-import { Piece, PieceSide, PieceKind, SquareModel } from './square.model';
+import { Piece, PieceSide, PieceKind, SquareModel } from '../square.model';
 
 export interface BoardMaterialScores {
-  p1: number;
-  p2: number;
+  player1: number;
+  player2: number;
 }
 
 export type BoardSquareCallback = (square: SquareModel, index: SquareIndex) => void;
@@ -75,8 +75,7 @@ export class BoardModel {
             piece = {
               kind: otherPiece.kind,
               side: otherPiece.side,
-              strength: otherPiece.strength,
-              firstMove: otherPiece.firstMove
+              strength: otherPiece.strength
             };
           }
           this.squares[ci][ri] = { code: other.squares[ci][ri].code, piece: piece };
@@ -92,24 +91,24 @@ export class BoardModel {
       this.halfMoves = other.halfMoves;
       this.gameState = {
         stalemate: other.gameState.stalemate,
-        p1Check: other.gameState.p1Check,
-        p1Checkmate: other.gameState.p1Checkmate,
-        p2Check: other.gameState.p2Check,
-        p2Checkmate: other.gameState.p2Checkmate
+        player1Check: other.gameState.player1Check,
+        player1Checkmate: other.gameState.player1Checkmate,
+        player2Check: other.gameState.player2Check,
+        player2Checkmate: other.gameState.player2Checkmate
       };
       this.gameStateNotations = {
         fen: other.gameStateNotations.fen
       };
     } else {
-      this.turn = PieceSide.P1;
+      this.turn = PieceSide.Player1;
       this.fullMoves = 0;
       this.halfMoves = 0;
       this.gameState = {
         stalemate: false,
-        p1Check: false,
-        p1Checkmate: false,
-        p2Check: false,
-        p2Checkmate: false,
+        player1Check: false,
+        player1Checkmate: false,
+        player2Check: false,
+        player2Checkmate: false,
       };
       this.gameStateNotations = {
         fen: BoardNotationsModel.getFENNotation(this)
@@ -166,14 +165,13 @@ export class BoardModel {
     }
 
     squareTo.piece = movingPiece;
-    squareTo.piece.firstMove = false;
     squareFrom.piece = undefined;
 
     // this.gameState is updated in a separate call
 
-    this.turn = (this.turn === PieceSide.P1 ? PieceSide.P2 : PieceSide.P1);
+    this.turn = (this.turn === PieceSide.Player1 ? PieceSide.Player2 : PieceSide.Player1);
 
-    if (this.turn === PieceSide.P1) {
+    if (this.turn === PieceSide.Player1) {
       this.fullMoves++;
     }
 
@@ -203,19 +201,18 @@ export class BoardModel {
       piece: {
         kind: kind,
         side: color,
-        strength: strength,
-        firstMove: true
+        strength: strength
       }
     };
   }
 
   public getMaterialScores(): BoardMaterialScores {
-    const scores: BoardMaterialScores = { p1: 0, p2: 0 };
+    const scores: BoardMaterialScores = { player1: 0, player2: 0 };
     this.forEachSquare(square => {
       if (square.piece !== undefined) {
         switch (square.piece.side) {
-          case PieceSide.P1: scores.p1 += square.piece.strength; break;
-          case PieceSide.P2: scores.p2 += square.piece.strength; break;
+          case PieceSide.Player1: scores.player1 += square.piece.strength; break;
+          case PieceSide.Player2: scores.player2 += square.piece.strength; break;
         }
       }
     });

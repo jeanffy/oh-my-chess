@@ -1,5 +1,5 @@
 import { BoardModel } from './board.model';
-import { PieceSide, PieceKind } from './square.model';
+import { PieceSide, PieceKind } from '../square.model';
 
 export namespace BoardNotationsModel {
   export function getFENNotation(board: BoardModel): string {
@@ -19,7 +19,7 @@ export namespace BoardNotationsModel {
             numberOfEmpty = 0;
           }
           switch (square.piece.side) {
-            case PieceSide.P1:
+            case PieceSide.Player1:
               switch (square.piece.kind) {
                 case PieceKind.Bishop: fenLine += 'B'; break;
                 case PieceKind.King: fenLine += 'K'; break;
@@ -29,7 +29,7 @@ export namespace BoardNotationsModel {
                 case PieceKind.Rook: fenLine += 'R'; break;
               }
               break;
-            case PieceSide.P2:
+            case PieceSide.Player2:
               switch (square.piece.kind) {
                 case PieceKind.Bishop: fenLine += 'b'; break;
                 case PieceKind.King: fenLine += 'k'; break;
@@ -50,8 +50,8 @@ export namespace BoardNotationsModel {
     fen += fenLines.join('/');
     fen += ' ';
     switch (board.turn) {
-      case PieceSide.P1: fen += 'w'; break;
-      case PieceSide.P2: fen += 'b'; break;
+      case PieceSide.Player1: fen += 'w'; break;
+      case PieceSide.Player2: fen += 'b'; break;
     }
     fen += ' ';
     fen += '(cs)';

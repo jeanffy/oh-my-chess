@@ -1,6 +1,6 @@
 import { BoardMovesModel, BoardValidMove } from '../board-moves.model';
 import { BoardModel } from '../board.model';
-import { PieceSide } from '../square.model';
+import { PieceSide } from '../../square.model';
 import { BoardAIPlayerStrategyModel } from './board-ai-player-strategy.model';
 
 export class BoardAIPlayerStrategyRandomModel extends BoardAIPlayerStrategyModel {
