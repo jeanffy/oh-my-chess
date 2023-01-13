@@ -30,8 +30,8 @@ export interface ValidMovesArgs {
 }
 
 export namespace BoardMovesModel {
-  const player1PawnStartingRow = 1;
-  const player2PawnStartingRow = 6;
+  const player2PawnStartingRow = 1;
+  const player1PawnStartingRow = 6;
 
   export function possibleMoves(board: BoardModel, args: PossibleMovesArgs): BoardPossibleMove[] {
     const fromSquare = board.squareAt(args.from);

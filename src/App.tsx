@@ -8,6 +8,7 @@ import { GameInfoComponent } from './features/GameInfoComponent';
 import { Subject, tap } from 'rxjs';
 import { PieceSide } from './models/square.model';
 import { GameControlsComponent } from './features/GameControlsComponent';
+import { PlayerInfoComponent } from './features/PlayerInfoComponent';
 
 interface AppProps {
 }
@@ -29,8 +30,8 @@ class App extends React.Component<AppProps, AppState> {
     super(props);
 
     this.board = new BoardModel();
-    this.board.initWithFEN('1R6/7k/7p/8/6Q1/P7/8/8 w KQkq - 0 34');
-    //this.board.initWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    //this.board.initWithFEN('1R6/7k/7p/8/6Q1/P7/8/8 w KQkq - 0 34');
+    this.board.initWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
     //this.board.initWithFEN('r1bqk3/p2p1p2/2p3NQ/4p3/1p2P3/2P2P2/PP1P1P1P/RNB1KB1R w (cs) (ep) (hm) 12');
     //this.board.initWithFEN('8/8/8/8/8/8/2q5/K7 w KQkq - 0 1');
     //this.board.initWithFEN('2b3n1/Qppk2p1/2npp3/1B6/8/2NP2P1/PP3q2/R1K5 b (cs) (ep) (hm) 18');
@@ -92,6 +93,12 @@ class App extends React.Component<AppProps, AppState> {
     });
   }
 
+  private onStrategyChanged(strategy: BoardAIPlayerStrategy): void {
+    const newGameInfo = this.state.gameInfo;
+    newGameInfo.strategy = strategy;
+    this.setState({ gameInfo: newGameInfo });
+  }
+
   public render() {
     return (
       <div className="App">
@@ -111,7 +118,25 @@ class App extends React.Component<AppProps, AppState> {
             boardActionEvent={this.boardActionEvent}
             boardActionDoneEvent={this.boardActionDoneEvent}
           />
-          <GameInfoComponent gameInfo={this.state.gameInfo}/>
+          <div className="player">
+            <PlayerInfoComponent
+              title="Player 1"
+              materialScore={this.state.gameInfo.materialScores.player1}
+              check={this.state.gameInfo.gameState.player1Check}
+              checkmate={this.state.gameInfo.gameState.player1Checkmate}
+            />
+          </div>
+          <div className="player">
+            <PlayerInfoComponent
+              title="Player 2"
+              materialScore={this.state.gameInfo.materialScores.player2}
+              check={this.state.gameInfo.gameState.player2Check}
+              checkmate={this.state.gameInfo.gameState.player2Checkmate}
+            />
+          </div>
+        </div>
+        <div className="bottom">
+          <GameInfoComponent gameInfo={this.state.gameInfo} onStrategyChanged={strategy => this.onStrategyChanged.bind(this)(strategy)}/>
         </div>
       </div>
     );

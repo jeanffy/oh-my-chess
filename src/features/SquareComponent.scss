@@ -2,6 +2,14 @@ td {
   border: 1px solid;
   text-align: center;
 
+  img {
+    /*
+      TODO: this is empirical, find better way
+      with "height: 100%" or "height: auto", an empty square has not the same height than a square with a piece on it
+    */
+    height: 43px;
+  }
+
   &.selected {
     background-color: olivedrab !important;
   }

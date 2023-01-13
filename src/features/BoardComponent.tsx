@@ -115,7 +115,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
       squares.push(<tr>{rowSquares}</tr>);
     }
     return (
-      <table>
+      <table className="board">
         <tbody>
           {squares}
         </tbody>

@@ -1,0 +1,18 @@
+table.player-info {
+  width: 100%;
+
+  td {
+    border: none;
+    text-align: left;
+    padding: 5px;
+
+    &.value {
+      text-align: right;
+
+      &.emphasis {
+        color: red;
+        font-weight: bold;
+      }
+    }
+  }
+}
