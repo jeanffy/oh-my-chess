@@ -1,4 +1,4 @@
-# Chandid Chess
+# Oh My Chess
 
 ## Description
 
@@ -8,7 +8,7 @@ Performance is not (maybe yet) at stake here.
 
 ## Status
 
-The game is in a almost-playable state right now, the followinf is not handled:
+The game is in a almost-playable state right now, the following is not handled:
 
 - castling
 - pawn promotion
@@ -17,7 +17,7 @@ The game is in a almost-playable state right now, the followinf is not handled:
 
 ## Technical info
 
-- project created with : `npx create-react-app candid-chess --template typescript`
+- project created with : `npx create-react-app oh-my-chess --template typescript`
 - SASS added using instruvtions in https://create-react-app.dev/docs/adding-a-sass-stylesheet
 - pieces icons from https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 
