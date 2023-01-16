@@ -62,9 +62,15 @@ class App extends React.Component<AppProps, AppState> {
   public onBoardAction(e: BoardActionEvent): void {
     const taken = this.board.move(e.move);
     this.board.updateState();
+
+    let autoPlay = (this.state.gameInfo.turn === PieceSide.Player1 ? this.state.player2Autoplay : this.state.player1Autoplay);
+    if (this.board.gameState.player1Checkmate || this.board.gameState.player2Checkmate) {
+      autoPlay = false;
+    }
+
     this.boardActionDoneEvent.next({
       move: e.move,
-      autoPlay: (this.state.gameInfo.turn === PieceSide.Player1 ? this.state.player2Autoplay : this.state.player1Autoplay),
+      autoPlay: autoPlay,
       taken: taken
     });
   }
