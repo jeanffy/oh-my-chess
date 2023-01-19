@@ -1,71 +1,72 @@
-import { BoardRepresentationModel, CodeMove, SquareCode } from './board-representation.model';
-import { BoardModel } from './board.model';
-import { Piece, PieceSide, PieceKind } from '../square.model';
+import { MBoardRepresentation, MCodeMove, MSquareCode } from './board-representation.model';
+import { MBoard } from './board.model';
+import { MPiece, MPieceSide, MPieceKind } from './square.model';
+import { MGameState } from '../game/game-state.model';
 
-export interface BoardMove {
-  fromPiece: Piece;
-  from: SquareCode;
-  to: SquareCode;
+export interface MBoardMove {
+  fromPiece: MPiece;
+  from: MSquareCode;
+  to: MSquareCode;
 }
 
-export interface BoardPossibleMove extends BoardMove {
-  take?: Piece;
+export interface MBoardPossibleMove extends MBoardMove {
+  take?: MPiece;
 }
 
-export interface BoardValidMove extends BoardPossibleMove {
-  nextBoard: BoardModel;
+export interface MBoardValidMove extends MBoardPossibleMove {
+  nextBoard: MBoard;
 }
 
-export interface PossibleMovesArgs {
-  from: SquareCode;
+export interface MPossibleMovesArgs {
+  from: MSquareCode;
 }
 
-interface PossibleMovesInternalArgs extends PossibleMovesArgs {
-  piece: Piece;
+interface MPossibleMovesInternalArgs extends MPossibleMovesArgs {
+  piece: MPiece;
 }
 
-export interface ValidMovesArgs {
-  from?: SquareCode;
-  possibleMoves?: BoardPossibleMove[];
+export interface MValidMovesArgs {
+  from?: MSquareCode;
+  possibleMoves?: MBoardPossibleMove[];
 }
 
-export namespace BoardMovesModel {
+export namespace MBoardMoves {
   const player2PawnStartingRow = 1;
   const player1PawnStartingRow = 6;
 
-  export function possibleMoves(board: BoardModel, args: PossibleMovesArgs): BoardPossibleMove[] {
+  export function possibleMoves(board: MBoard, args: MPossibleMovesArgs): MBoardPossibleMove[] {
     const fromSquare = board.squareAt(args.from);
     if (fromSquare.piece === undefined) {
       return [];
     }
     const fromPiece = fromSquare.piece;
 
-    let moves: BoardPossibleMove[] = [];
+    let moves: MBoardPossibleMove[] = [];
     switch (fromPiece.kind) {
-      case PieceKind.Bishop: moves = possibleMovesBishop(board, { ...args, piece: fromPiece }); break;
-      case PieceKind.King: moves = possibleMovesKing(board, { ...args, piece: fromPiece }); break;
-      case PieceKind.Knight: moves = possibleMovesKnight(board, { ...args, piece: fromPiece }); break;
-      case PieceKind.Pawn: moves = possibleMovesPawn(board, { ...args, piece: fromPiece }); break;
-      case PieceKind.Queen: moves = possibleMovesQueen(board, { ...args, piece: fromPiece }); break;
-      case PieceKind.Rook: moves = possibleMovesRook(board, { ...args, piece: fromPiece }); break;
+      case MPieceKind.Bishop: moves = possibleMovesBishop(board, { ...args, piece: fromPiece }); break;
+      case MPieceKind.King: moves = possibleMovesKing(board, { ...args, piece: fromPiece }); break;
+      case MPieceKind.Knight: moves = possibleMovesKnight(board, { ...args, piece: fromPiece }); break;
+      case MPieceKind.Pawn: moves = possibleMovesPawn(board, { ...args, piece: fromPiece }); break;
+      case MPieceKind.Queen: moves = possibleMovesQueen(board, { ...args, piece: fromPiece }); break;
+      case MPieceKind.Rook: moves = possibleMovesRook(board, { ...args, piece: fromPiece }); break;
     }
 
     return moves;
   }
 
-  export function validMoves(board: BoardModel, args: ValidMovesArgs): BoardValidMove[] {
-    let possibleMoves: BoardPossibleMove[] | undefined = args.possibleMoves;
+  export function validMoves(state: MGameState, board: MBoard, args: MValidMovesArgs): MBoardValidMove[] {
+    let possibleMoves: MBoardPossibleMove[] | undefined = args.possibleMoves;
     if (possibleMoves === undefined && args.from !== undefined) {
-      possibleMoves = BoardMovesModel.possibleMoves(board, { from: args.from });
+      possibleMoves = MBoardMoves.possibleMoves(board, { from: args.from });
     }
     if (possibleMoves === undefined) {
       return [];
     }
-    const validMoves: BoardValidMove[] = [];
+    const validMoves: MBoardValidMove[] = [];
     for (const possibleMove of possibleMoves) {
       const nextBoard = board.cloneWithMove(possibleMove);
-      nextBoard.updateState();
-      const keepMove = (possibleMove.fromPiece.side === PieceSide.Player1 ? !nextBoard.gameState.player1Check : !nextBoard.gameState.player2Check);
+      const nextState = MGameState.createFromBoard(nextBoard);
+      const keepMove = (possibleMove.fromPiece.side === MPieceSide.Player1 ? !nextState.player1Check : !nextState.player2Check);
       if (keepMove) {
         validMoves.push({ ...possibleMove, nextBoard: nextBoard });
       }
@@ -73,8 +74,8 @@ export namespace BoardMovesModel {
     return validMoves;
   }
 
-  function possibleMovesBishop(board: BoardModel, args: PossibleMovesInternalArgs): BoardPossibleMove[] {
-    const moves: BoardPossibleMove[] = [];
+  function possibleMovesBishop(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
+    const moves: MBoardPossibleMove[] = [];
     moves.push(...iteratePossibleMoves(board, 1, 1, args)); // top right
     moves.push(...iteratePossibleMoves(board, 1, -1, args)); // bottom right
     moves.push(...iteratePossibleMoves(board, -1, -1, args)); // bottom left
@@ -82,7 +83,7 @@ export namespace BoardMovesModel {
     return moves;
   }
 
-  function possibleMovesKing(board: BoardModel, args: PossibleMovesInternalArgs): BoardPossibleMove[] {
+  function possibleMovesKing(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
     // TODO: handle castling
     return getPossibleMoves(board, [
       { h: 0, v: 1 }, // top
@@ -96,7 +97,7 @@ export namespace BoardMovesModel {
     ], args);
   }
 
-  function possibleMovesKnight(board: BoardModel, args: PossibleMovesInternalArgs): BoardPossibleMove[] {
+  function possibleMovesKnight(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
     return getPossibleMoves(board, [
       { h: 1, v: 2 },
       { h: 2, v: 1 },
@@ -109,16 +110,16 @@ export namespace BoardMovesModel {
     ], args);
   }
 
-  function possibleMovesPawn(board: BoardModel, args: PossibleMovesInternalArgs): BoardPossibleMove[] {
-    const moves: BoardPossibleMove[] = [];
+  function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
+    const moves: MBoardPossibleMove[] = [];
 
-    const codeMove1Ahead = new CodeMove(0, (args.piece.side === PieceSide.Player1 ? 1 : -1 ));
-    const code1Ahead = BoardRepresentationModel.codeWithMoveEx(args.from, codeMove1Ahead);
-    let piece1Ahead: Piece | undefined;
-    if (BoardRepresentationModel.isValidCode(code1Ahead)) {
+    const codeMove1Ahead = new MCodeMove(0, (args.piece.side === MPieceSide.Player1 ? 1 : -1 ));
+    const code1Ahead = MBoardRepresentation.codeWithMoveEx(args.from, codeMove1Ahead);
+    let piece1Ahead: MPiece | undefined;
+    if (MBoardRepresentation.isValidCode(code1Ahead)) {
       piece1Ahead = board.squareAtEx(args.from, codeMove1Ahead).piece;
       if (piece1Ahead === undefined) {
-        const to = BoardRepresentationModel.codeWithMoveEx(args.from, codeMove1Ahead);
+        const to = MBoardRepresentation.codeWithMoveEx(args.from, codeMove1Ahead);
         moves.push({
           fromPiece: args.piece,
           from: args.from,
@@ -129,16 +130,16 @@ export namespace BoardMovesModel {
     }
 
     // if pawn is at its initial position, it can then move 2 squares ahead
-    const pieceRow = BoardRepresentationModel.codeToIndex(board.squareAt(args.from).code).ri;
+    const pieceRow = MBoardRepresentation.codeToIndex(board.squareAt(args.from).code).ri;
     let firstMove;
     switch (args.piece.side) {
-      case PieceSide.Player1: firstMove = (pieceRow === player1PawnStartingRow); break;
-      case PieceSide.Player2: firstMove = (pieceRow === player2PawnStartingRow); break;
+      case MPieceSide.Player1: firstMove = (pieceRow === player1PawnStartingRow); break;
+      case MPieceSide.Player2: firstMove = (pieceRow === player2PawnStartingRow); break;
     }
     if (firstMove) {
-      const codeMove2Ahead = new CodeMove(0, (args.piece.side === PieceSide.Player1 ? 2 : -2 ));
-      const code2Ahead = BoardRepresentationModel.codeWithMoveEx(args.from, codeMove2Ahead);
-      if (BoardRepresentationModel.isValidCode(code2Ahead) &&
+      const codeMove2Ahead = new MCodeMove(0, (args.piece.side === MPieceSide.Player1 ? 2 : -2 ));
+      const code2Ahead = MBoardRepresentation.codeWithMoveEx(args.from, codeMove2Ahead);
+      if (MBoardRepresentation.isValidCode(code2Ahead) &&
           piece1Ahead === undefined && board.squareAtEx(args.from, codeMove2Ahead).piece === undefined) {
         moves.push({
           fromPiece: args.piece,
@@ -149,9 +150,9 @@ export namespace BoardMovesModel {
       }
     }
 
-    const codeMoveTopRight = new CodeMove((args.piece.side === PieceSide.Player1 ? 1 : -1 ), (args.piece.side === PieceSide.Player1 ? 1 : -1 ));
-    const codeTopRight = BoardRepresentationModel.codeWithMoveEx(args.from, codeMoveTopRight);
-    if (BoardRepresentationModel.isValidCode(codeTopRight)) {
+    const codeMoveTopRight = new MCodeMove((args.piece.side === MPieceSide.Player1 ? 1 : -1 ), (args.piece.side === MPieceSide.Player1 ? 1 : -1 ));
+    const codeTopRight = MBoardRepresentation.codeWithMoveEx(args.from, codeMoveTopRight);
+    if (MBoardRepresentation.isValidCode(codeTopRight)) {
       const pieceTopRight = board.squareAtEx(args.from, codeMoveTopRight).piece;
       if (pieceTopRight !== undefined && pieceTopRight.side !== args.piece.side) {
         moves.push({
@@ -163,9 +164,9 @@ export namespace BoardMovesModel {
       }
     }
 
-    const codeMoveTopLeft = new CodeMove((args.piece.side === PieceSide.Player1 ? -1 : 1 ), (args.piece.side === PieceSide.Player1 ? 1 : -1 ));
-    const codeTopLeft = BoardRepresentationModel.codeWithMoveEx(args.from, codeMoveTopLeft);
-    if (BoardRepresentationModel.isValidCode(codeTopLeft)) {
+    const codeMoveTopLeft = new MCodeMove((args.piece.side === MPieceSide.Player1 ? -1 : 1 ), (args.piece.side === MPieceSide.Player1 ? 1 : -1 ));
+    const codeTopLeft = MBoardRepresentation.codeWithMoveEx(args.from, codeMoveTopLeft);
+    if (MBoardRepresentation.isValidCode(codeTopLeft)) {
       const pieceTopLeft = board.squareAtEx(args.from, codeMoveTopLeft).piece;
       if (pieceTopLeft !== undefined && pieceTopLeft.side !== args.piece.side) {
         moves.push({
@@ -182,8 +183,8 @@ export namespace BoardMovesModel {
     return moves;
   }
 
-  function possibleMovesQueen(board: BoardModel, args: PossibleMovesInternalArgs): BoardPossibleMove[] {
-    const moves: BoardPossibleMove[] = [];
+  function possibleMovesQueen(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
+    const moves: MBoardPossibleMove[] = [];
     moves.push(...iteratePossibleMoves(board, 0, 1, args)); // top
     moves.push(...iteratePossibleMoves(board, 1, 1, args)); // top right
     moves.push(...iteratePossibleMoves(board, 1, 0, args)); // right
@@ -195,8 +196,8 @@ export namespace BoardMovesModel {
     return moves;
   }
 
-  function possibleMovesRook(board: BoardModel, args: PossibleMovesInternalArgs): BoardPossibleMove[] {
-    const moves: BoardPossibleMove[] = [];
+  function possibleMovesRook(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
+    const moves: MBoardPossibleMove[] = [];
     moves.push(...iteratePossibleMoves(board, 0, 1, args)); // top
     moves.push(...iteratePossibleMoves(board, 1, 0, args)); // right
     moves.push(...iteratePossibleMoves(board, 0, -1, args)); // bottom
@@ -204,18 +205,18 @@ export namespace BoardMovesModel {
     return moves;
   }
 
-  interface MoveIncrement {
+  interface MMoveIncrement {
     h: number;
     v: number;
   }
 
-  function getPossibleMoves(board: BoardModel, increments: MoveIncrement[], args: PossibleMovesInternalArgs): BoardPossibleMove[] {
-    const moves: BoardPossibleMove[] = [];
+  function getPossibleMoves(board: MBoard, increments: MMoveIncrement[], args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
+    const moves: MBoardPossibleMove[] = [];
 
     for (const increment of increments) {
-      const move = new CodeMove(increment.h, increment.v);
-      const nextCode = BoardRepresentationModel.codeWithMoveEx(args.from, move);
-      if (BoardRepresentationModel.isValidCode(nextCode)) {
+      const move = new MCodeMove(increment.h, increment.v);
+      const nextCode = MBoardRepresentation.codeWithMoveEx(args.from, move);
+      if (MBoardRepresentation.isValidCode(nextCode)) {
         const nextSquare = board.squareAtEx(args.from, move);
         if (nextSquare.piece !== undefined) {
           if (nextSquare.piece.side !== args.piece.side) {
@@ -240,12 +241,12 @@ export namespace BoardMovesModel {
     return moves;
   }
 
-  function iteratePossibleMoves(board: BoardModel, incrementHorizontal: number, incrementVertical: number, args: PossibleMovesInternalArgs): BoardPossibleMove[] {
-    const moves: BoardPossibleMove[] = [];
+  function iteratePossibleMoves(board: MBoard, incrementHorizontal: number, incrementVertical: number, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
+    const moves: MBoardPossibleMove[] = [];
 
-    const move = new CodeMove(incrementHorizontal, incrementVertical);
-    let nextCode = BoardRepresentationModel.codeWithMoveEx(args.from, move);
-    while (BoardRepresentationModel.isValidCode(nextCode) && board.squareAtEx(args.from, move).piece === undefined) {
+    const move = new MCodeMove(incrementHorizontal, incrementVertical);
+    let nextCode = MBoardRepresentation.codeWithMoveEx(args.from, move);
+    while (MBoardRepresentation.isValidCode(nextCode) && board.squareAtEx(args.from, move).piece === undefined) {
       moves.push({
         fromPiece: args.piece,
         from: args.from,
@@ -254,12 +255,12 @@ export namespace BoardMovesModel {
       });
       move.cm += incrementHorizontal;
       move.rm += incrementVertical;
-      nextCode = BoardRepresentationModel.codeWithMoveEx(args.from, move);
+      nextCode = MBoardRepresentation.codeWithMoveEx(args.from, move);
     }
-    if (BoardRepresentationModel.isValidCode(nextCode) &&
+    if (MBoardRepresentation.isValidCode(nextCode) &&
         board.squareAtEx(args.from, move).piece !== undefined &&
         board.squareAtEx(args.from, move).piece?.side !== args.piece.side) {
-      const to = BoardRepresentationModel.codeWithMoveEx(args.from, move);
+      const to = MBoardRepresentation.codeWithMoveEx(args.from, move);
       moves.push({
         fromPiece: args.piece,
         from: args.from,

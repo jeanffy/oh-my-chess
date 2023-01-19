@@ -1,6 +1,6 @@
 // a SquareCode is a standard notation, like 'a1' or 'c8'
 // columns go from 'a' to 'h', rows go from '1' to '8'
-export type SquareCode = string;
+export type MSquareCode = string;
 
 // a SquareIndex represents aboluste square indexes in array (2-dim)
 // columns and rows go from 0 to 7
@@ -8,7 +8,7 @@ export type SquareCode = string;
 // column of index 7 corresponds to column 'h' in standard notation
 // row of index 0 corresponds to row '8' in standard notation
 // row of index 7 corresponds to row '1' in standard notation
-export class SquareIndex {
+export class MSquareIndex {
   public ci: number;
   public ri: number;
 
@@ -22,7 +22,7 @@ export class SquareIndex {
 // if a piece is at 'c5':
 // - { cm: 1, rm: 2 } moves the piece to 'd7', which is index { ci: 3, ri: 1 }
 // - { cm: -1, rm: -2 } moves the piece to 'b3', which is index { ci: 1, ri: 5 }
-export class CodeMove {
+export class MCodeMove {
   public cm: number;
   public rm: number;
 
@@ -32,7 +32,7 @@ export class CodeMove {
   }
 }
 
-export namespace BoardRepresentationModel {
+export namespace MBoardRepresentation {
   let columnCount: number = 0;
   let rowCount: number = 0;
 
@@ -41,7 +41,7 @@ export namespace BoardRepresentationModel {
     rowCount = rows;
   }
 
-  export function isValidIndex(index: SquareIndex): boolean {
+  export function isValidIndex(index: MSquareIndex): boolean {
     if (index.ci < 0 || index.ci > columnCount - 1) {
       return false;
     }
@@ -51,7 +51,7 @@ export namespace BoardRepresentationModel {
     return true;
   }
 
-  export function isValidCode(code: SquareCode): boolean {
+  export function isValidCode(code: MSquareCode): boolean {
     if (code.length !== 2) {
       return false;
     }
@@ -59,30 +59,30 @@ export namespace BoardRepresentationModel {
     return isValidIndex(index);
   }
 
-  export function codeToIndex(code: SquareCode): SquareIndex {
+  export function codeToIndex(code: MSquareCode): MSquareIndex {
     const codeColumn = code[0];
     const codeRow = code[1];
     const ci = codeColumn.charCodeAt(0) - 'a'.charCodeAt(0);
     const ri = rowCount - Number(codeRow);
-    return new SquareIndex(ci, ri);
+    return new MSquareIndex(ci, ri);
   }
 
-  export function indexToCode(ci: number, ri: number): SquareCode {
+  export function indexToCode(ci: number, ri: number): MSquareCode {
     const column = String.fromCharCode('a'.charCodeAt(0) + ci);
     const row = rowCount - ri;
     return `${column}${row}`;
   }
 
-  export function indexToCodeEx(index: SquareIndex): SquareCode {
+  export function indexToCodeEx(index: MSquareIndex): MSquareCode {
     return indexToCode(index.ci, index.ri);
   }
 
-  export function codeWithMove(code: SquareCode, cm: number, rm: number): SquareCode {
+  export function codeWithMove(code: MSquareCode, cm: number, rm: number): MSquareCode {
     const index = codeToIndex(code);
     return indexToCode(index.ci + cm, index.ri - rm);
   }
 
-  export function codeWithMoveEx(code: SquareCode, codeMove: CodeMove): SquareCode {
+  export function codeWithMoveEx(code: MSquareCode, codeMove: MCodeMove): MSquareCode {
     return codeWithMove(code, codeMove.cm, codeMove.rm);
   }
 }

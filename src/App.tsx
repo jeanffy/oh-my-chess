@@ -1,14 +1,15 @@
 import React from 'react';
 import './App.scss';
-import { GameInfoModel } from './models/game-info.model';
+import { MGameInfo } from './models/game/game-info.model';
 import { BoardComponent, BoardActionEvent, BoardActionDoneEvent } from './features/BoardComponent';
-import { BoardAIPlayerModel, BoardAIPlayerStrategy } from './models/board/board-ai-player.model';
-import { BoardModel } from './models/board/board.model';
+import { MAIPlayerStrategy } from './models/ai-player/ai-player.model';
 import { GameInfoComponent } from './features/GameInfoComponent';
 import { Subject, tap } from 'rxjs';
-import { PieceSide } from './models/square.model';
+import { MPieceSide } from './models/board/square.model';
 import { GameControlsComponent } from './features/GameControlsComponent';
 import { PlayerInfoComponent } from './features/PlayerInfoComponent';
+import { MAIPlayer } from './models/ai-player/ai-player.model';
+import { MGame } from './models/game/game.model';
 
 interface AppProps {
 }
@@ -16,12 +17,12 @@ interface AppProps {
 interface AppState {
   player1Autoplay: boolean;
   player2Autoplay: boolean;
-  gameInfo: GameInfoModel;
+  gameInfo: MGameInfo;
 }
 
 class App extends React.Component<AppProps, AppState> {
-  private board: BoardModel;
-  private aiPlayer: BoardAIPlayerModel;
+  private game: MGame;
+  private aiPlayer: MAIPlayer;
 
   private boardActionEvent = new Subject<BoardActionEvent>();
   private boardActionDoneEvent = new Subject<BoardActionDoneEvent>();
@@ -29,27 +30,35 @@ class App extends React.Component<AppProps, AppState> {
   public constructor(props: AppProps) {
     super(props);
 
-    this.board = new BoardModel();
-    //this.board.initWithFEN('1R6/7k/7p/8/6Q1/P7/8/8 w KQkq - 0 34');
-    this.board.initWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
-    //this.board.initWithFEN('r1bqk3/p2p1p2/2p3NQ/4p3/1p2P3/2P2P2/PP1P1P1P/RNB1KB1R w (cs) (ep) (hm) 12');
-    //this.board.initWithFEN('8/8/8/8/8/8/2q5/K7 w KQkq - 0 1');
-    //this.board.initWithFEN('2b3n1/Qppk2p1/2npp3/1B6/8/2NP2P1/PP3q2/R1K5 b (cs) (ep) (hm) 18');
-    this.aiPlayer = new BoardAIPlayerModel(this.board);
+    this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    this.aiPlayer = new MAIPlayer(this.game);
 
     this.state = {
       player1Autoplay: false,
       player2Autoplay: true,
-      gameInfo: {
-        strategy: BoardAIPlayerStrategy.Random,
-        turn: this.board.turn,
-        materialScores: this.board.getMaterialScores(),
-        gameState: this.board.gameState,
-        gameStateNotations: this.board.gameStateNotations
-      }
+      gameInfo: this.game.info
     };
 
-    if (this.state.gameInfo.turn === PieceSide.Player2) {
+    //this.board.initWithFEN('1R6/7k/7p/8/6Q1/P7/8/8 w KQkq - 0 34');
+    //this.board.initWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    //this.board.initWithFEN('r1bqk3/p2p1p2/2p3NQ/4p3/1p2P3/2P2P2/PP1P1P1P/RNB1KB1R w (cs) (ep) (hm) 12');
+    //this.board.initWithFEN('8/8/8/8/8/8/2q5/K7 w KQkq - 0 1');
+    //this.board.initWithFEN('2b3n1/Qppk2p1/2npp3/1B6/8/2NP2P1/PP3q2/R1K5 b (cs) (ep) (hm) 18');
+
+    // this.state = {
+    //   player1Autoplay: false,
+    //   player2Autoplay: true,
+    //   gameInfo: MGameInfo.createWithBoard(this.board)
+      // gameInfo: new GameInfo({
+      //   strategy: BoardAIPlayerStrategy.Random,
+      //   turn: this.board.turn,
+      //   materialScores: this.board.getMaterialScores(),
+      //   state: this.board.state,
+      //   notations: this.board.notations
+      // }
+    // };
+
+    if (this.game.info.turn === MPieceSide.Player2) {
       this.doAIPlayerMove();
     }
   }
@@ -60,11 +69,10 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   public onBoardAction(e: BoardActionEvent): void {
-    const taken = this.board.move(e.move);
-    this.board.updateState();
+    const taken = this.game.boardMove(e.move);
 
-    let autoPlay = (this.state.gameInfo.turn === PieceSide.Player1 ? this.state.player2Autoplay : this.state.player1Autoplay);
-    if (this.board.gameState.player1Checkmate || this.board.gameState.player2Checkmate) {
+    let autoPlay = (this.game.info.turn === MPieceSide.Player1 ? this.state.player1Autoplay : this.state.player2Autoplay);
+    if (this.game.info.state.player1Checkmate || this.game.info.state.player2Checkmate) {
       autoPlay = false;
     }
 
@@ -76,15 +84,8 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   public onBoardActionDone(e: BoardActionDoneEvent): void {
-    const newGameInfo: GameInfoModel = {
-      ...this.state.gameInfo,
-      turn: this.board.turn,
-      materialScores: this.board.getMaterialScores(),
-      gameState: this.board.gameState,
-      gameStateNotations: this.board.gameStateNotations
-    };
     this.setState(
-      { gameInfo: newGameInfo },
+      { gameInfo: this.game.info },
       (e.autoPlay ? this.doAIPlayerMove : undefined)
     );
   }
@@ -99,7 +100,7 @@ class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  private onStrategyChanged(strategy: BoardAIPlayerStrategy): void {
+  private onStrategyChanged(strategy: MAIPlayerStrategy): void {
     const newGameInfo = this.state.gameInfo;
     newGameInfo.strategy = strategy;
     this.setState({ gameInfo: newGameInfo });
@@ -119,30 +120,33 @@ class App extends React.Component<AppProps, AppState> {
         </div>
         <div className="board">
           <BoardComponent
-            model={this.board}
-            gameInfo={this.state.gameInfo}
+            game={this.game}
             boardActionEvent={this.boardActionEvent}
             boardActionDoneEvent={this.boardActionDoneEvent}
           />
           <div className="player">
             <PlayerInfoComponent
               title="Player 1"
-              materialScore={this.state.gameInfo.materialScores.player1}
-              check={this.state.gameInfo.gameState.player1Check}
-              checkmate={this.state.gameInfo.gameState.player1Checkmate}
+              materialScore={this.game.info.materialScores.player1}
+              check={this.game.info.state.player1Check}
+              checkmate={this.game.info.state.player1Checkmate}
             />
           </div>
           <div className="player">
             <PlayerInfoComponent
               title="Player 2"
-              materialScore={this.state.gameInfo.materialScores.player2}
-              check={this.state.gameInfo.gameState.player2Check}
-              checkmate={this.state.gameInfo.gameState.player2Checkmate}
+              materialScore={this.game.info.materialScores.player2}
+              check={this.game.info.state.player2Check}
+              checkmate={this.game.info.state.player2Checkmate}
             />
           </div>
         </div>
         <div className="bottom">
-          <GameInfoComponent gameInfo={this.state.gameInfo} onStrategyChanged={strategy => this.onStrategyChanged.bind(this)(strategy)}/>
+          <GameInfoComponent
+            info={this.game.info}
+            notations={this.game.notations}
+            onStrategyChanged={strategy => this.onStrategyChanged.bind(this)(strategy)}
+          />
         </div>
       </div>
     );

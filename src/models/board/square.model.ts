@@ -1,6 +1,6 @@
-import { SquareCode } from './board/board-representation.model';
+import { MSquareCode } from './board-representation.model';
 
-export enum PieceKind {
+export enum MPieceKind {
   Bishop = 'bishop',
   King = 'king',
   Knight = 'knight',
@@ -11,18 +11,18 @@ export enum PieceKind {
 
 // player1 starts at the bottom of the board
 // player2 starts at the top of the board
-export enum PieceSide {
+export enum MPieceSide {
   Player1 = 'player1',
   Player2 = 'player2'
 }
 
-export interface Piece {
-  kind: PieceKind;
-  side: PieceSide;
+export interface MPiece {
+  kind: MPieceKind;
+  side: MPieceSide;
   strength: number;
 }
 
-export interface SquareModel {
-  code: SquareCode;
-  piece?: Piece;
+export interface MSquare {
+  code: MSquareCode;
+  piece?: MPiece;
 }

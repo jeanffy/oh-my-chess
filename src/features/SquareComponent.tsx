@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieceSide, PieceKind, SquareModel } from '../models/square.model';
+import { MPieceSide, MPieceKind, MSquare } from '../models/board/square.model';
 import player1Rook from '../assets/images/pieces/green/rook.svg';
 import player1Knight from '../assets/images/pieces/green/knight.svg';
 import player1Bishop from '../assets/images/pieces/green/bishop.svg';
@@ -15,10 +15,11 @@ import player2Pawn from '../assets/images/pieces/blue/pawn.svg';
 import './SquareComponent.scss';
 
 export interface SquareComponentProps {
-  model: SquareModel;
+  model: MSquare;
   selected: boolean;
   highlighted: boolean;
-  onClicked: (square: SquareModel) => void;
+  highlightedLastMove: boolean;
+  onClicked: (square: MSquare) => void;
 }
 
 export class SquareComponent extends React.Component<SquareComponentProps> {
@@ -29,7 +30,8 @@ export class SquareComponent extends React.Component<SquareComponentProps> {
   public render(): React.ReactNode {
     const selectedClass = (this.props.selected ? 'selected' : '');
     const highlightedClass = (this.props.highlighted ? 'highlighted' : '');
-    const className = `${selectedClass} ${highlightedClass}`;
+    const highlightedLastMoveClass = (this.props.highlightedLastMove ? 'highlighted-last-move' : '');
+    const className = `${selectedClass} ${highlightedClass} ${highlightedLastMoveClass}`;
 
     const piece = this.props.model.piece;
     if (piece === undefined) {
@@ -37,23 +39,23 @@ export class SquareComponent extends React.Component<SquareComponentProps> {
     }
 
     let imgSource;
-    if (piece.side === PieceSide.Player2) {
+    if (piece.side === MPieceSide.Player2) {
       switch (piece.kind) {
-        case PieceKind.Bishop: imgSource = player2Bishop; break;
-        case PieceKind.King: imgSource = player2King; break;
-        case PieceKind.Knight: imgSource = player2Knight; break;
-        case PieceKind.Pawn: imgSource = player2Pawn; break;
-        case PieceKind.Queen: imgSource = player2Queen; break;
-        case PieceKind.Rook: imgSource = player2Rook; break;
+        case MPieceKind.Bishop: imgSource = player2Bishop; break;
+        case MPieceKind.King: imgSource = player2King; break;
+        case MPieceKind.Knight: imgSource = player2Knight; break;
+        case MPieceKind.Pawn: imgSource = player2Pawn; break;
+        case MPieceKind.Queen: imgSource = player2Queen; break;
+        case MPieceKind.Rook: imgSource = player2Rook; break;
       }
-    } else if (piece.side === PieceSide.Player1) {
+    } else if (piece.side === MPieceSide.Player1) {
       switch (piece.kind) {
-        case PieceKind.Bishop: imgSource = player1Bishop; break;
-        case PieceKind.King: imgSource = player1King; break;
-        case PieceKind.Knight: imgSource = player1Knight; break;
-        case PieceKind.Pawn: imgSource = player1Pawn; break;
-        case PieceKind.Queen: imgSource = player1Queen; break;
-        case PieceKind.Rook: imgSource = player1Rook; break;
+        case MPieceKind.Bishop: imgSource = player1Bishop; break;
+        case MPieceKind.King: imgSource = player1King; break;
+        case MPieceKind.Knight: imgSource = player1Knight; break;
+        case MPieceKind.Pawn: imgSource = player1Pawn; break;
+        case MPieceKind.Queen: imgSource = player1Queen; break;
+        case MPieceKind.Rook: imgSource = player1Rook; break;
       }
     }
     if (imgSource === undefined) {

@@ -1,43 +1,48 @@
-import { BoardInitModel } from './board-init.model';
-import { BoardMove, BoardMovesModel, BoardValidMove as BoardPossibleMove } from './board-moves.model';
-import { BoardNotationsModel } from './board-notations.model';
-import { BoardRepresentationModel, CodeMove, SquareCode, SquareIndex } from './board-representation.model';
-import { BoardState, BoardStateModel } from './board-state.model';
-import { Piece, PieceSide, PieceKind, SquareModel } from '../square.model';
+import { MBoardInit } from './board-init.model';
+import { MBoardMove, MBoardMoves, MBoardValidMove as BoardPossibleMove } from './board-moves.model';
+import { MBoardRepresentation, MCodeMove, MSquareCode, MSquareIndex } from './board-representation.model';
+import { MPiece, MPieceSide, MPieceKind, MSquare } from './square.model';
 
-export interface BoardMaterialScores {
-  player1: number;
-  player2: number;
+export class MBoardMaterialScores {
+  public player1: number;
+  public player2: number;
+
+  public constructor(other?: Partial<MBoardMaterialScores>) {
+    this.player1 = (other?.player1 !== undefined ? other.player1 : 0);
+    this.player2 = (other?.player2 !== undefined ? other.player2 : 0);
+  }
+
+  public static createFromBoard(board: MBoard): MBoardMaterialScores {
+    const o = new MBoardMaterialScores({ player1: 0, player2: 0 });
+    board.forEachSquare(square => {
+      if (square.piece !== undefined) {
+        switch (square.piece.side) {
+          case MPieceSide.Player1: o.player1 += square.piece.strength; break;
+          case MPieceSide.Player2: o.player2 += square.piece.strength; break;
+        }
+      }
+    });
+    return o;
+  }
 }
 
-export type BoardSquareCallback = (square: SquareModel, index: SquareIndex) => void;
+export type MBoardSquareCallback = (square: MSquare, index: MSquareIndex) => void;
 
-export interface BoardGameStateNotations {
-  fen: string;
-}
-
-export interface PieceWithPossibleMoves {
-  square: SquareModel;
+export interface MPieceWithPossibleMoves {
+  square: MSquare;
   possibleMoves: BoardPossibleMove[];
 }
 
-export class BoardModel {
-  public isClone = false;
-
+export class MBoard {
   public rowCount: number;
   public columnCount: number;
-  public squares: SquareModel[][];
-  public turn: PieceSide;
-  public fullMoves: number;
-  public halfMoves: number;
-  public gameState: BoardState;
-  public gameStateNotations: BoardGameStateNotations;
+  public squares: MSquare[][];
 
-  public constructor(other?: BoardModel) {
+  public constructor(other?: MBoard) {
     this.rowCount = (other !== undefined ? other.rowCount : 8);
     this.columnCount = (other !== undefined ? other.columnCount : 8);
 
-    BoardRepresentationModel.init(this.columnCount, this.rowCount);
+    MBoardRepresentation.init(this.columnCount, this.rowCount);
 
     // we allocate squares in a 2-dim array so that 1st index is the column and the 2nd is the row
     //
@@ -69,7 +74,7 @@ export class BoardModel {
       this.squares[ci] = Array(this.rowCount).fill(undefined);
       for (let ri = 0; ri < this.rowCount; ri++) {
         if (other !== undefined) {
-          let piece: Piece | undefined;
+          let piece: MPiece | undefined;
           const otherPiece = other.squares[ci][ri].piece;
           if (otherPiece !== undefined) {
             piece = {
@@ -80,120 +85,58 @@ export class BoardModel {
           }
           this.squares[ci][ri] = { code: other.squares[ci][ri].code, piece: piece };
         } else {
-          this.squares[ci][ri] = { code: BoardRepresentationModel.indexToCode(ci, ri), piece: undefined };
+          this.squares[ci][ri] = { code: MBoardRepresentation.indexToCode(ci, ri), piece: undefined };
         }
       }
-    }
-
-    if (other !== undefined) {
-      this.turn = other.turn;
-      this.fullMoves = other.fullMoves;
-      this.halfMoves = other.halfMoves;
-      this.gameState = {
-        stalemate: other.gameState.stalemate,
-        player1Check: other.gameState.player1Check,
-        player1Checkmate: other.gameState.player1Checkmate,
-        player2Check: other.gameState.player2Check,
-        player2Checkmate: other.gameState.player2Checkmate
-      };
-      this.gameStateNotations = {
-        fen: other.gameStateNotations.fen
-      };
-    } else {
-      this.turn = PieceSide.Player1;
-      this.fullMoves = 0;
-      this.halfMoves = 0;
-      this.gameState = {
-        stalemate: false,
-        player1Check: false,
-        player1Checkmate: false,
-        player2Check: false,
-        player2Checkmate: false,
-      };
-      this.gameStateNotations = {
-        fen: BoardNotationsModel.getFENNotation(this)
-      };
     }
   }
 
   public initWithFEN(fenNotation: string): void {
-    BoardInitModel.populateBoardWithFENNotation(this, fenNotation);
-    this.gameState = BoardStateModel.computeState(this);
-    this.gameStateNotations = {
-      fen: BoardNotationsModel.getFENNotation(this)
-    };
+    MBoardInit.populateBoardWithFENNotation(this, fenNotation);
   }
 
-  public cloneWithMove(move: BoardMove): BoardModel {
-    const clone = new BoardModel(this);
-    clone.isClone = true;
+  public cloneWithMove(move: MBoardMove): MBoard {
+    const clone = new MBoard(this);
     clone.move(move);
     return clone;
   }
 
-  public forEachSquare(callback: BoardSquareCallback): void {
+  public forEachSquare(callback: MBoardSquareCallback): void {
     for (let ci = 0; ci < this.columnCount; ci++) {
       for (let ri = 0; ri < this.rowCount; ri++) {
-        callback(this.squares[ci][ri], new SquareIndex(ci, ri));
+        callback(this.squares[ci][ri], new MSquareIndex(ci, ri));
       }
     }
   }
 
-  public squareAt(code: SquareCode, cm: number = 0, rm: number = 0): SquareModel {
-    const codeToUse = BoardRepresentationModel.codeWithMove(code, cm, rm);
-    const index = BoardRepresentationModel.codeToIndex(codeToUse);
+  public squareAt(code: MSquareCode, cm: number = 0, rm: number = 0): MSquare {
+    const codeToUse = MBoardRepresentation.codeWithMove(code, cm, rm);
+    const index = MBoardRepresentation.codeToIndex(codeToUse);
     return this.squares[index.ci][index.ri];
   }
 
-  public squareAtEx(code: SquareCode, codeMove: CodeMove): SquareModel {
+  public squareAtEx(code: MSquareCode, codeMove: MCodeMove): MSquare {
     return this.squareAt(code, codeMove.cm, codeMove.rm);
   }
 
-  public move(move: BoardMove): Piece | undefined {
-    const squareFrom = this.squareAt(move.from);
-    if (squareFrom.piece === undefined) {
-      return undefined;
-    }
-
-    const movingPiece = squareFrom.piece;
-
-    let takenPiece: Piece | undefined;
+  public move(move: MBoardMove): MPiece | undefined {
+    let takenPiece: MPiece | undefined;
 
     const squareTo = this.squareAt(move.to);
     if (squareTo.piece !== undefined) {
-      takenPiece = squareFrom.piece;
+      takenPiece = squareTo.piece;
     }
 
-    squareTo.piece = movingPiece;
+    squareTo.piece = move.fromPiece;
+    const squareFrom = this.squareAt(move.from);
     squareFrom.piece = undefined;
-
-    // this.gameState is updated in a separate call
-
-    this.turn = (this.turn === PieceSide.Player1 ? PieceSide.Player2 : PieceSide.Player1);
-
-    if (this.turn === PieceSide.Player1) {
-      this.fullMoves++;
-    }
-
-    this.halfMoves++;
-    if (takenPiece !== undefined || movingPiece.kind === PieceKind.Pawn) {
-      this.halfMoves = 0;
-    }
-
-    this.gameStateNotations = {
-      fen: BoardNotationsModel.getFENNotation(this)
-    };
 
     return takenPiece;
   }
 
-  public updateState(): void {
-    this.gameState = BoardStateModel.computeState(this);
-  }
-
-  public setSquare(code: SquareCode, kind: PieceKind, color: PieceSide, strength: number): void {
-    const index = BoardRepresentationModel.codeToIndex(code);
-    if (!BoardRepresentationModel.isValidIndex(index)) {
+  public setSquare(code: MSquareCode, kind: MPieceKind, color: MPieceSide, strength: number): void {
+    const index = MBoardRepresentation.codeToIndex(code);
+    if (!MBoardRepresentation.isValidIndex(index)) {
       throw new Error(`invalid code '${code}'`);
     }
     this.squares[index.ci][index.ri] = {
@@ -206,28 +149,15 @@ export class BoardModel {
     };
   }
 
-  public getMaterialScores(): BoardMaterialScores {
-    const scores: BoardMaterialScores = { player1: 0, player2: 0 };
-    this.forEachSquare(square => {
-      if (square.piece !== undefined) {
-        switch (square.piece.side) {
-          case PieceSide.Player1: scores.player1 += square.piece.strength; break;
-          case PieceSide.Player2: scores.player2 += square.piece.strength; break;
-        }
-      }
-    });
-    return scores;
-  }
-
-  public getAllPiecesWithPossibleMoves(color: PieceSide): PieceWithPossibleMoves[] {
-    const allPieces: SquareModel[] = [];
+  public getAllPiecesWithPossibleMoves(color: MPieceSide): MPieceWithPossibleMoves[] {
+    const allPieces: MSquare[] = [];
     this.forEachSquare(square => {
       if (square.piece !== undefined && square.piece.side === color) {
         allPieces.push(square);
       }
     });
     return allPieces
-      .map(p => ({ square: p, possibleMoves: BoardMovesModel.possibleMoves(this, { from: p.code }) }) as PieceWithPossibleMoves)
+      .map(p => ({ square: p, possibleMoves: MBoardMoves.possibleMoves(this, { from: p.code }) }) as MPieceWithPossibleMoves)
       .filter(p => p.possibleMoves.length > 0);
   }
 }

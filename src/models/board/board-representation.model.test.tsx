@@ -1,47 +1,47 @@
-import { BoardRepresentationModel, CodeMove, SquareIndex } from './board-representation.model';
+import { MBoardRepresentation, MCodeMove, MSquareIndex } from './board-representation.model';
 
-BoardRepresentationModel.init(8, 8);
+MBoardRepresentation.init(8, 8);
 
-describe('BoardRepresentationModel', (): void => {
+describe('MBoardRepresentation', (): void => {
   test('isValidIndex', (): void => {
-    expect(BoardRepresentationModel.isValidIndex(new SquareIndex(0, 0))).toBeTruthy();
-    expect(BoardRepresentationModel.isValidIndex(new SquareIndex(7, 7))).toBeTruthy();
-    expect(BoardRepresentationModel.isValidIndex(new SquareIndex(-1, -1))).toBeFalsy();
-    expect(BoardRepresentationModel.isValidIndex(new SquareIndex(8, 8))).toBeFalsy();
+    expect(MBoardRepresentation.isValidIndex(new MSquareIndex(0, 0))).toBeTruthy();
+    expect(MBoardRepresentation.isValidIndex(new MSquareIndex(7, 7))).toBeTruthy();
+    expect(MBoardRepresentation.isValidIndex(new MSquareIndex(-1, -1))).toBeFalsy();
+    expect(MBoardRepresentation.isValidIndex(new MSquareIndex(8, 8))).toBeFalsy();
   });
 
   test('isValidCode', (): void => {
-    expect(BoardRepresentationModel.isValidCode('a1')).toBeTruthy();
-    expect(BoardRepresentationModel.isValidCode('h8')).toBeTruthy();
-    expect(BoardRepresentationModel.isValidCode('a0')).toBeFalsy();
-    expect(BoardRepresentationModel.isValidCode('a9')).toBeFalsy();
-    expect(BoardRepresentationModel.isValidCode('i1')).toBeFalsy();
+    expect(MBoardRepresentation.isValidCode('a1')).toBeTruthy();
+    expect(MBoardRepresentation.isValidCode('h8')).toBeTruthy();
+    expect(MBoardRepresentation.isValidCode('a0')).toBeFalsy();
+    expect(MBoardRepresentation.isValidCode('a9')).toBeFalsy();
+    expect(MBoardRepresentation.isValidCode('i1')).toBeFalsy();
   });
 
   test('codeToIndex', (): void => {
-    expect(BoardRepresentationModel.codeToIndex('a1')).toEqual(new SquareIndex(0, 7));
-    expect(BoardRepresentationModel.codeToIndex('h8')).toEqual(new SquareIndex(7, 0));
+    expect(MBoardRepresentation.codeToIndex('a1')).toEqual(new MSquareIndex(0, 7));
+    expect(MBoardRepresentation.codeToIndex('h8')).toEqual(new MSquareIndex(7, 0));
   });
 
   test('indexToCode', (): void => {
-    expect(BoardRepresentationModel.indexToCode(0, 0)).toEqual('a8');
-    expect(BoardRepresentationModel.indexToCode(7, 7)).toEqual('h1');
+    expect(MBoardRepresentation.indexToCode(0, 0)).toEqual('a8');
+    expect(MBoardRepresentation.indexToCode(7, 7)).toEqual('h1');
   });
 
   test('indexToCodeEx', (): void => {
-    expect(BoardRepresentationModel.indexToCodeEx(new SquareIndex(0, 0))).toEqual('a8');
-    expect(BoardRepresentationModel.indexToCodeEx(new SquareIndex(7, 7))).toEqual('h1');
+    expect(MBoardRepresentation.indexToCodeEx(new MSquareIndex(0, 0))).toEqual('a8');
+    expect(MBoardRepresentation.indexToCodeEx(new MSquareIndex(7, 7))).toEqual('h1');
   });
 
   test('codeWithMove', (): void => {
-    expect(BoardRepresentationModel.codeWithMove('a1', 0, 0)).toEqual('a1');
-    expect(BoardRepresentationModel.codeWithMove('a1', 1, 1)).toEqual('b2');
-    expect(BoardRepresentationModel.codeWithMove('h8', -1, -1)).toEqual('g7');
+    expect(MBoardRepresentation.codeWithMove('a1', 0, 0)).toEqual('a1');
+    expect(MBoardRepresentation.codeWithMove('a1', 1, 1)).toEqual('b2');
+    expect(MBoardRepresentation.codeWithMove('h8', -1, -1)).toEqual('g7');
   });
 
   test('codeWithMoveEx', (): void => {
-    expect(BoardRepresentationModel.codeWithMoveEx('a1', new CodeMove(0, 0))).toEqual('a1');
-    expect(BoardRepresentationModel.codeWithMoveEx('a1', new CodeMove(1, 1))).toEqual('b2');
-    expect(BoardRepresentationModel.codeWithMoveEx('h8', new CodeMove(-1, -1))).toEqual('g7');
+    expect(MBoardRepresentation.codeWithMoveEx('a1', new MCodeMove(0, 0))).toEqual('a1');
+    expect(MBoardRepresentation.codeWithMoveEx('a1', new MCodeMove(1, 1))).toEqual('b2');
+    expect(MBoardRepresentation.codeWithMoveEx('h8', new MCodeMove(-1, -1))).toEqual('g7');
   });
 });
