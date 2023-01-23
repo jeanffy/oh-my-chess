@@ -1,7 +1,7 @@
-import { MBoardInit } from './board-init.model';
-import { MBoardMove, MBoardMoves, MBoardValidMove as BoardPossibleMove } from './board-moves.model';
-import { MBoardRepresentation, MCodeMove, MSquareCode, MSquareIndex } from './board-representation.model';
-import { MPiece, MPieceSide, MPieceKind, MSquare } from './square.model';
+import { MBoardInit, MBoardInitPopulateWithFENResult } from './board-init';
+import { MBoardMove, MBoardMoves, MBoardValidMove as BoardPossibleMove } from './board-moves';
+import { MBoardRepresentation, MCodeMove, MSquareCode, MSquareIndex } from './board-representation';
+import { MBSPiece, MBSPieceSide, MBSPieceKind, MBoardSquare } from './board-square';
 
 export class MBoardMaterialScores {
   public player1: number;
@@ -17,8 +17,8 @@ export class MBoardMaterialScores {
     board.forEachSquare(square => {
       if (square.piece !== undefined) {
         switch (square.piece.side) {
-          case MPieceSide.Player1: o.player1 += square.piece.strength; break;
-          case MPieceSide.Player2: o.player2 += square.piece.strength; break;
+          case MBSPieceSide.Player1: o.player1 += square.piece.strength; break;
+          case MBSPieceSide.Player2: o.player2 += square.piece.strength; break;
         }
       }
     });
@@ -26,17 +26,17 @@ export class MBoardMaterialScores {
   }
 }
 
-export type MBoardSquareCallback = (square: MSquare, index: MSquareIndex) => void;
+export type MBoardSquareCallback = (square: MBoardSquare, index: MSquareIndex) => void;
 
 export interface MPieceWithPossibleMoves {
-  square: MSquare;
+  square: MBoardSquare;
   possibleMoves: BoardPossibleMove[];
 }
 
 export class MBoard {
   public rowCount: number;
   public columnCount: number;
-  public squares: MSquare[][];
+  public squares: MBoardSquare[][];
 
   public constructor(other?: MBoard) {
     this.rowCount = (other !== undefined ? other.rowCount : 8);
@@ -74,14 +74,14 @@ export class MBoard {
       this.squares[ci] = Array(this.rowCount).fill(undefined);
       for (let ri = 0; ri < this.rowCount; ri++) {
         if (other !== undefined) {
-          let piece: MPiece | undefined;
+          let piece: MBSPiece | undefined;
           const otherPiece = other.squares[ci][ri].piece;
           if (otherPiece !== undefined) {
-            piece = {
+            piece = new MBSPiece({
               kind: otherPiece.kind,
               side: otherPiece.side,
               strength: otherPiece.strength
-            };
+            });
           }
           this.squares[ci][ri] = { code: other.squares[ci][ri].code, piece: piece };
         } else {
@@ -91,8 +91,8 @@ export class MBoard {
     }
   }
 
-  public initWithFEN(fenNotation: string): void {
-    MBoardInit.populateBoardWithFENNotation(this, fenNotation);
+  public initWithFEN(fenNotation: string): MBoardInitPopulateWithFENResult {
+    return MBoardInit.populateBoardWithFENNotation(this, fenNotation);
   }
 
   public cloneWithMove(move: MBoardMove): MBoard {
@@ -109,18 +109,18 @@ export class MBoard {
     }
   }
 
-  public squareAt(code: MSquareCode, cm: number = 0, rm: number = 0): MSquare {
+  public squareAt(code: MSquareCode, cm: number = 0, rm: number = 0): MBoardSquare {
     const codeToUse = MBoardRepresentation.codeWithMove(code, cm, rm);
     const index = MBoardRepresentation.codeToIndex(codeToUse);
     return this.squares[index.ci][index.ri];
   }
 
-  public squareAtEx(code: MSquareCode, codeMove: MCodeMove): MSquare {
+  public squareAtEx(code: MSquareCode, codeMove: MCodeMove): MBoardSquare {
     return this.squareAt(code, codeMove.cm, codeMove.rm);
   }
 
-  public move(move: MBoardMove): MPiece | undefined {
-    let takenPiece: MPiece | undefined;
+  public move(move: MBoardMove): MBSPiece | undefined {
+    let takenPiece: MBSPiece | undefined;
 
     const squareTo = this.squareAt(move.to);
     if (squareTo.piece !== undefined) {
@@ -134,23 +134,23 @@ export class MBoard {
     return takenPiece;
   }
 
-  public setSquare(code: MSquareCode, kind: MPieceKind, color: MPieceSide, strength: number): void {
+  public setSquare(code: MSquareCode, kind: MBSPieceKind, color: MBSPieceSide, strength: number): void {
     const index = MBoardRepresentation.codeToIndex(code);
     if (!MBoardRepresentation.isValidIndex(index)) {
       throw new Error(`invalid code '${code}'`);
     }
     this.squares[index.ci][index.ri] = {
       code: code,
-      piece: {
+      piece: new MBSPiece({
         kind: kind,
         side: color,
         strength: strength
-      }
+      })
     };
   }
 
-  public getAllPiecesWithPossibleMoves(color: MPieceSide): MPieceWithPossibleMoves[] {
-    const allPieces: MSquare[] = [];
+  public getAllPiecesWithPossibleMoves(color: MBSPieceSide): MPieceWithPossibleMoves[] {
+    const allPieces: MBoardSquare[] = [];
     this.forEachSquare(square => {
       if (square.piece !== undefined && square.piece.side === color) {
         allPieces.push(square);

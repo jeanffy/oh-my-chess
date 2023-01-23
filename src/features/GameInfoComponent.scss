@@ -1,11 +1,4 @@
-div.game-info {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  flex-grow: 1;
-}
-
-.state, .material-score {
+.state {
   display: flex;
   gap: 15px;
 }

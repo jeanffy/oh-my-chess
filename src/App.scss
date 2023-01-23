@@ -1,4 +1,4 @@
-div.App {
+.App {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -7,17 +7,20 @@ div.App {
   max-width: 1000px;
   margin: auto;
 
-  div.controls {
+  .game-controls {
     display: flex;
     gap: 15px;
   }
 
-  div.board {
+  .game-area {
     display: flex;
     gap: 15px;
 
-    div.player {
-      flex-grow: 1;
+    .board {
+      flex-shrink: 0;
     }
   }
+
+  // .game-bottom {
+  // }
 }

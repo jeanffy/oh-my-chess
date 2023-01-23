@@ -1,4 +1,4 @@
-import { MBoardRepresentation, MCodeMove, MSquareIndex } from './board-representation.model';
+import { MBoardRepresentation, MCodeMove, MSquareIndex } from './board-representation';
 
 MBoardRepresentation.init(8, 8);
 

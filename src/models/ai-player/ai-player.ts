@@ -1,8 +1,8 @@
-import { MGame } from '../game/game.model';
-import { MAIPlayerStrategyGreedy } from './ai-player-strategy-greedy.model';
-import { MAIPlayerStrategyRandom } from './ai-player-strategy-random.model';
-import { MBoardValidMove } from '../board/board-moves.model';
-import { MPieceSide } from '../board/square.model';
+import { MGame } from '../game/game';
+import { MAIPlayerStrategyGreedy } from './ai-player-strategy-greedy';
+import { MAIPlayerStrategyRandom } from './ai-player-strategy-random';
+import { MBoardValidMove } from '../board/board-moves';
+import { MBSPieceSide } from '../board/board-square';
 
 export enum MAIPlayerStrategy {
   Random,
@@ -15,7 +15,7 @@ export class MAIPlayer {
   public constructor(private game: MGame) {
   }
 
-  public async getNextMove(color: MPieceSide, strategy: MAIPlayerStrategy): Promise<MBoardValidMove> {
+  public async getNextMove(color: MBSPieceSide, strategy: MAIPlayerStrategy): Promise<MBoardValidMove | undefined> {
     switch (strategy) {
       case MAIPlayerStrategy.Random:
         await new Promise(resolve => setTimeout(resolve, fakeThinkingDelay)); // to simulate some thinking

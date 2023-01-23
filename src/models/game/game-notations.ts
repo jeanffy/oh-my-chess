@@ -1,5 +1,5 @@
-import { MGame } from './game.model';
-import { MPieceKind, MPieceSide } from '../board/square.model';
+import { MGame } from './game';
+import { MBSPieceKind, MBSPieceSide } from '../board/board-square';
 
 export class MGameNotations {
   public fen: string;
@@ -33,24 +33,24 @@ namespace MGameNotationsHelper {
             numberOfEmpty = 0;
           }
           switch (square.piece.side) {
-            case MPieceSide.Player1:
+            case MBSPieceSide.Player1:
               switch (square.piece.kind) {
-                case MPieceKind.Bishop: fenLine += 'B'; break;
-                case MPieceKind.King: fenLine += 'K'; break;
-                case MPieceKind.Knight: fenLine += 'N'; break;
-                case MPieceKind.Pawn: fenLine += 'P'; break;
-                case MPieceKind.Queen: fenLine += 'Q'; break;
-                case MPieceKind.Rook: fenLine += 'R'; break;
+                case MBSPieceKind.Bishop: fenLine += 'B'; break;
+                case MBSPieceKind.King: fenLine += 'K'; break;
+                case MBSPieceKind.Knight: fenLine += 'N'; break;
+                case MBSPieceKind.Pawn: fenLine += 'P'; break;
+                case MBSPieceKind.Queen: fenLine += 'Q'; break;
+                case MBSPieceKind.Rook: fenLine += 'R'; break;
               }
               break;
-            case MPieceSide.Player2:
+            case MBSPieceSide.Player2:
               switch (square.piece.kind) {
-                case MPieceKind.Bishop: fenLine += 'b'; break;
-                case MPieceKind.King: fenLine += 'k'; break;
-                case MPieceKind.Knight: fenLine += 'n'; break;
-                case MPieceKind.Pawn: fenLine += 'p'; break;
-                case MPieceKind.Queen: fenLine += 'q'; break;
-                case MPieceKind.Rook: fenLine += 'r'; break;
+                case MBSPieceKind.Bishop: fenLine += 'b'; break;
+                case MBSPieceKind.King: fenLine += 'k'; break;
+                case MBSPieceKind.Knight: fenLine += 'n'; break;
+                case MBSPieceKind.Pawn: fenLine += 'p'; break;
+                case MBSPieceKind.Queen: fenLine += 'q'; break;
+                case MBSPieceKind.Rook: fenLine += 'r'; break;
               }
               break;
           }
@@ -63,18 +63,18 @@ namespace MGameNotationsHelper {
     }
     fen += fenLines.join('/');
     fen += ' ';
-    switch (game.info.turn) {
-      case MPieceSide.Player1: fen += 'w'; break;
-      case MPieceSide.Player2: fen += 'b'; break;
+    switch (game.state.turn) {
+      case MBSPieceSide.Player1: fen += 'w'; break;
+      case MBSPieceSide.Player2: fen += 'b'; break;
     }
     fen += ' ';
     fen += '(cs)';
     fen += ' ';
     fen += '(ep)';
     fen += ' ';
-    fen += `${game.info.halfMoves}`;
+    fen += `${game.state.halfMoves}`;
     fen += ' ';
-    fen += `${game.info.fullMoves}`;
+    fen += `${game.state.fullMoves}`;
     return fen;
   }
 }

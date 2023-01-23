@@ -1,6 +1,6 @@
 import React from 'react';
 import './PlayerInfoComponent.scss';
-import { Card, CardHeader, CardContent, Typography } from '@mui/material';
+import { Card, CardHeader, CardContent } from '@mui/material';
 
 export interface PlayerInfoProps {
   title: string;

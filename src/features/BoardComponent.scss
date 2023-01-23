@@ -1,16 +1,23 @@
 table.board {
-  border: 1px solid;
   border-collapse: collapse;
 
   td {
     width: 50px;
     height: 50px;
+
+    &.border-left, &.border-bottom {
+      text-align: center;
+    }
+
+    &.square {
+      border: 1px solid;
+    }
   }
 
-  tr:nth-child(odd) td:nth-child(odd), tr:nth-child(even) td:nth-child(even) {
-    background-color: #ffcf9f;
-  }
-  tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
+  tr.square:nth-child(odd) td.square:nth-child(odd), tr.square:nth-child(even) td.square:nth-child(even) {
     background-color: #d28c45;
+  }
+  tr.square:nth-child(odd) td.square:nth-child(even), tr.square:nth-child(even) td.square:nth-child(odd) {
+    background-color: #ffcf9f;
   }
 }
