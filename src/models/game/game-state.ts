@@ -52,8 +52,8 @@ export class MGameState {
     const p1PossibleMoves = board.getAllPiecesWithPossibleMoves(MBSPieceSide.Player1).flatMap(p => p.possibleMoves);
     const p2PossibleMoves = board.getAllPiecesWithPossibleMoves(MBSPieceSide.Player2).flatMap(p => p.possibleMoves);
 
-    const p1State = MGameStateHelper.computePlayerState(board, MBSPieceSide.Player1, p1PossibleMoves, p2PossibleMoves);
-    const p2State = MGameStateHelper.computePlayerState(board, MBSPieceSide.Player2, p2PossibleMoves, p1PossibleMoves);
+    const p1State = computePlayerState(board, MBSPieceSide.Player1, p1PossibleMoves, p2PossibleMoves);
+    const p2State = computePlayerState(board, MBSPieceSide.Player2, p2PossibleMoves, p1PossibleMoves);
 
     const newBoardState = new MGameState();
     newBoardState.stalemate = false; // TODO: detect stalemate
@@ -65,33 +65,31 @@ export class MGameState {
   }
 }
 
-namespace MGameStateHelper {
-  interface PieceColorState {
-    check: boolean;
-    checkmate: boolean;
-  }
+interface PieceColorState {
+  check: boolean;
+  checkmate: boolean;
+}
 
-  export function computePlayerState(board: MBoard,
-                                    playerSide: MBSPieceSide,
-                                    playerPossibleMoves: MBoardPossibleMove[],
-                                    opponentPossibleMoves: MBoardPossibleMove[]): PieceColorState {
-    const opponentSide = (playerSide === MBSPieceSide.Player1 ? MBSPieceSide.Player2 : MBSPieceSide.Player1);
+export function computePlayerState(board: MBoard,
+                                  playerSide: MBSPieceSide,
+                                  playerPossibleMoves: MBoardPossibleMove[],
+                                  opponentPossibleMoves: MBoardPossibleMove[]): PieceColorState {
+  const opponentSide = (playerSide === MBSPieceSide.Player1 ? MBSPieceSide.Player2 : MBSPieceSide.Player1);
 
-    // - a player is in check state if any of the opponent's possible moves takes his king
-    // - a player is in checkmate state if all of his possible moves still leaves him in a check state
+  // - a player is in check state if any of the opponent's possible moves takes his king
+  // - a player is in checkmate state if all of his possible moves still leaves him in a check state
 
-    const check = opponentPossibleMoves.some(m => m.take?.kind === MBSPieceKind.King);
+  const check = opponentPossibleMoves.some(m => m.take?.kind === MBSPieceKind.King);
 
-    let checkmate = true;
-    for (const move of playerPossibleMoves) {
-      const nextBoard = board.cloneWithMove(move);
-      const nextOpponentPossibleMoves = nextBoard.getAllPiecesWithPossibleMoves(opponentSide).flatMap(p => p.possibleMoves);
-      if (!nextOpponentPossibleMoves.some(m => m.take?.kind === MBSPieceKind.King)) {
-        checkmate = false; // at least one move is possible without taking the king -> not in checkmate
-        break;
-      }
+  let checkmate = true;
+  for (const move of playerPossibleMoves) {
+    const nextBoard = board.cloneWithMove(move);
+    const nextOpponentPossibleMoves = nextBoard.getAllPiecesWithPossibleMoves(opponentSide).flatMap(p => p.possibleMoves);
+    if (!nextOpponentPossibleMoves.some(m => m.take?.kind === MBSPieceKind.King)) {
+      checkmate = false; // at least one move is possible without taking the king -> not in checkmate
+      break;
     }
-
-    return { check: check, checkmate: checkmate };
   }
+
+  return { check: check, checkmate: checkmate };
 }

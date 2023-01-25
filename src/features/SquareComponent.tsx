@@ -15,7 +15,7 @@ import player2Pawn from '../assets/images/pieces/blue/pawn.svg';
 import './SquareComponent.scss';
 
 export interface SquareComponentProps {
-  model: MBoardSquare;
+  square: MBoardSquare;
   selected: boolean;
   highlighted: boolean;
   highlightedLastMove: boolean;
@@ -29,9 +29,9 @@ export class SquareComponent extends React.Component<SquareComponentProps> {
     const highlightedLastMoveClass = (this.props.highlightedLastMove ? 'highlighted-last-move' : '');
     const className = `square ${selectedClass} ${highlightedClass} ${highlightedLastMoveClass}`;
 
-    const piece = this.props.model.piece;
+    const piece = this.props.square.piece;
     if (piece === undefined) {
-      return <td className={className} onClick={() => this.props.onClicked(this.props.model)}></td>;
+      return <td className={className} onClick={() => this.props.onClicked(this.props.square)}></td>;
     }
 
     let imgSource;
@@ -55,13 +55,13 @@ export class SquareComponent extends React.Component<SquareComponentProps> {
       }
     }
     if (imgSource === undefined) {
-      return <td className={className} onClick={() => this.props.onClicked(this.props.model)}></td>;
+      return <td className={className} onClick={() => this.props.onClicked(this.props.square)}></td>;
     }
 
     return (
       <td
         className={className}
-        onClick={() => this.props.onClicked(this.props.model)}>
+        onClick={() => this.props.onClicked(this.props.square)}>
         <img src={imgSource} alt=""/>
       </td>
     );

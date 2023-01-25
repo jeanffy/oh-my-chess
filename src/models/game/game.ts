@@ -1,4 +1,4 @@
-import { MBoardMoves, MBoardValidMove } from '../board/board-moves';
+import * as boardMoves from '../board/board-moves';
 import { MBoard } from '../board/board';
 import { MGameConfig } from './game-config';
 import { MGameNotations } from './game-notations';
@@ -18,19 +18,19 @@ export class MGame {
     this.notations = new MGameNotations(other?.notations);
   }
 
-  public boardMove(move: MBoardValidMove): MBSPiece | undefined {
+  public boardMove(move: boardMoves.MBoardValidMove): MBSPiece | undefined {
     const taken = this.board.move(move);
     this.state.update(this.board, move, taken);
     this.notations = MGameNotations.createFromGame(this);
     return taken;
   }
 
-  public getAllValidMoves(pieceSide: MBSPieceSide): MBoardValidMove[] {
+  public getAllValidMoves(pieceSide: MBSPieceSide): boardMoves.MBoardValidMove[] {
     const allPossibleMoves = this.board.getAllPiecesWithPossibleMoves(pieceSide).flatMap(p => p.possibleMoves);
     if (allPossibleMoves.length === 0) {
       return [];
     }
-    const allValidMoves = MBoardMoves.validMoves(this.state, this.board, { possibleMoves: allPossibleMoves });
+    const allValidMoves = boardMoves.computeValidMoves(this.state, this.board, { possibleMoves: allPossibleMoves });
     return allValidMoves;
   }
 

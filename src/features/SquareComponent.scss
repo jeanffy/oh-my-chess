@@ -11,11 +11,11 @@ td {
     background-color: olivedrab !important;
   }
 
-  &.highlighted {
-    background-color: darkseagreen !important;
-  }
-
   &.highlighted-last-move {
     background-color: darksalmon !important;
+  }
+
+  &.highlighted {
+    background-color: darkseagreen !important;
   }
 }

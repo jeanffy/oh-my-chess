@@ -1,6 +1,6 @@
 import React from 'react';
 import { Subject, Subscription, tap } from 'rxjs';
-import { MBoardMove, MBoardMoves, MBoardValidMove } from '../models/board/board-moves';
+import * as boardMoves from '../models/board/board-moves';
 import { MBSPiece, MBoardSquare } from '../models/board/board-square';
 import './BoardComponent.scss';
 import { SquareComponent } from './SquareComponent';
@@ -8,11 +8,11 @@ import { MGameState } from '../models/game/game-state';
 import { MBoard } from '../models/board/board';
 
 export interface BoardActionEvent {
-  move: MBoardValidMove;
+  move: boardMoves.MBoardValidMove;
 }
 
 export interface BoardActionDoneEvent {
-  move: MBoardMove;
+  move: boardMoves.MBoardMove;
   taken?: MBSPiece;
   autoPlay: boolean;
 }
@@ -80,7 +80,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
     }
 
     // another piece already selected -> move
-    const validMoves = MBoardMoves.validMoves(this.props.gameState, this.props.gameBoard, { from: selectedSquare.code });
+    const validMoves = boardMoves.computeValidMoves(this.props.gameState, this.props.gameBoard, { from: selectedSquare.code });
     const validMove = validMoves.find(m => m.to === square.code);
     if (validMove !== undefined) {
       this.props.boardActionEvent.next({
@@ -94,9 +94,9 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
   }
 
   public render(): React.ReactNode {
-    let validMoves: MBoardValidMove[] = [];
+    let validMoves: boardMoves.MBoardValidMove[] = [];
     if (this.state.selectedSquare !== undefined) {
-      validMoves = MBoardMoves.validMoves(this.props.gameState, this.props.gameBoard, { from: this.state.selectedSquare.code });
+      validMoves = boardMoves.computeValidMoves(this.props.gameState, this.props.gameBoard, { from: this.state.selectedSquare.code });
     }
 
     const squares = [];
@@ -105,9 +105,13 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
       for (let c = 0; c < this.props.gameBoard.columnCount; c++) {
         const square = this.props.gameBoard.squares[c][r];
         const lastMove = this.props.gameState.getLastMove();
+        if (square.code === 'e4') {
+          console.log(square);
+          console.log(validMoves);
+        }
         rowSquares.push(
           <SquareComponent
-            model={square}
+            square={square}
             selected={this.state.selectedSquare?.code === square.code}
             highlighted={validMoves.map(m => m.to).includes(square.code)}
             highlightedLastMove={square.code === lastMove?.from || square.code === lastMove?.to}

@@ -1,6 +1,6 @@
-import { MBoardInit, MBoardInitPopulateWithFENResult } from './board-init';
-import { MBoardMove, MBoardMoves, MBoardValidMove as BoardPossibleMove } from './board-moves';
-import { MBoardRepresentation, MCodeMove, MSquareCode, MSquareIndex } from './board-representation';
+import * as boardInit from './board-init';
+import * as boardMoves from './board-moves';
+import * as boardRepresentation from './board-representation';
 import { MBSPiece, MBSPieceSide, MBSPieceKind, MBoardSquare } from './board-square';
 
 export class MBoardMaterialScores {
@@ -26,11 +26,11 @@ export class MBoardMaterialScores {
   }
 }
 
-export type MBoardSquareCallback = (square: MBoardSquare, index: MSquareIndex) => void;
+export type MBoardSquareCallback = (square: MBoardSquare, index: boardRepresentation.MSquareIndex) => void;
 
 export interface MPieceWithPossibleMoves {
   square: MBoardSquare;
-  possibleMoves: BoardPossibleMove[];
+  possibleMoves: boardMoves.MBoardPossibleMove[];
 }
 
 export class MBoard {
@@ -42,7 +42,7 @@ export class MBoard {
     this.rowCount = (other !== undefined ? other.rowCount : 8);
     this.columnCount = (other !== undefined ? other.columnCount : 8);
 
-    MBoardRepresentation.init(this.columnCount, this.rowCount);
+    boardRepresentation.init(this.columnCount, this.rowCount);
 
     // we allocate squares in a 2-dim array so that 1st index is the column and the 2nd is the row
     //
@@ -85,17 +85,17 @@ export class MBoard {
           }
           this.squares[ci][ri] = { code: other.squares[ci][ri].code, piece: piece };
         } else {
-          this.squares[ci][ri] = { code: MBoardRepresentation.indexToCode(ci, ri), piece: undefined };
+          this.squares[ci][ri] = { code: boardRepresentation.indexToCode(ci, ri), piece: undefined };
         }
       }
     }
   }
 
-  public initWithFEN(fenNotation: string): MBoardInitPopulateWithFENResult {
-    return MBoardInit.populateBoardWithFENNotation(this, fenNotation);
+  public initWithFEN(fenNotation: string): boardInit.MBoardInitPopulateWithFENResult {
+    return boardInit.populateBoardWithFENNotation(this, fenNotation);
   }
 
-  public cloneWithMove(move: MBoardMove): MBoard {
+  public cloneWithMove(move: boardMoves.MBoardMove): MBoard {
     const clone = new MBoard(this);
     clone.move(move);
     return clone;
@@ -104,22 +104,22 @@ export class MBoard {
   public forEachSquare(callback: MBoardSquareCallback): void {
     for (let ci = 0; ci < this.columnCount; ci++) {
       for (let ri = 0; ri < this.rowCount; ri++) {
-        callback(this.squares[ci][ri], new MSquareIndex(ci, ri));
+        callback(this.squares[ci][ri], new boardRepresentation.MSquareIndex(ci, ri));
       }
     }
   }
 
-  public squareAt(code: MSquareCode, cm: number = 0, rm: number = 0): MBoardSquare {
-    const codeToUse = MBoardRepresentation.codeWithMove(code, cm, rm);
-    const index = MBoardRepresentation.codeToIndex(codeToUse);
+  public squareAt(code: boardRepresentation.MSquareCode, cm: number = 0, rm: number = 0): MBoardSquare {
+    const codeToUse = boardRepresentation.codeWithMove(code, cm, rm);
+    const index = boardRepresentation.codeToIndex(codeToUse);
     return this.squares[index.ci][index.ri];
   }
 
-  public squareAtEx(code: MSquareCode, codeMove: MCodeMove): MBoardSquare {
+  public squareAtEx(code: boardRepresentation.MSquareCode, codeMove: boardRepresentation.MCodeMove): MBoardSquare {
     return this.squareAt(code, codeMove.cm, codeMove.rm);
   }
 
-  public move(move: MBoardMove): MBSPiece | undefined {
+  public move(move: boardMoves.MBoardMove): MBSPiece | undefined {
     let takenPiece: MBSPiece | undefined;
 
     const squareTo = this.squareAt(move.to);
@@ -134,9 +134,9 @@ export class MBoard {
     return takenPiece;
   }
 
-  public setSquare(code: MSquareCode, kind: MBSPieceKind, color: MBSPieceSide, strength: number): void {
-    const index = MBoardRepresentation.codeToIndex(code);
-    if (!MBoardRepresentation.isValidIndex(index)) {
+  public setSquare(code: boardRepresentation.MSquareCode, kind: MBSPieceKind, color: MBSPieceSide, strength: number): void {
+    const index = boardRepresentation.codeToIndex(code);
+    if (!boardRepresentation.isValidIndex(index)) {
       throw new Error(`invalid code '${code}'`);
     }
     this.squares[index.ci][index.ri] = {
@@ -157,7 +157,7 @@ export class MBoard {
       }
     });
     return allPieces
-      .map(p => ({ square: p, possibleMoves: MBoardMoves.possibleMoves(this, { from: p.code }) }) as MPieceWithPossibleMoves)
+      .map(p => ({ square: p, possibleMoves: boardMoves.computePossibleMoves(this, { from: p.code }) }) as MPieceWithPossibleMoves)
       .filter(p => p.possibleMoves.length > 0);
   }
 }

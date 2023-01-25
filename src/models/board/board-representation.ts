@@ -32,57 +32,55 @@ export class MCodeMove {
   }
 }
 
-export namespace MBoardRepresentation {
-  let columnCount: number = 0;
-  let rowCount: number = 0;
+let columnCount: number = 0;
+let rowCount: number = 0;
 
-  export function init(columns: number, rows: number): void {
-    columnCount = columns;
-    rowCount = rows;
-  }
+export function init(columns: number, rows: number): void {
+  columnCount = columns;
+  rowCount = rows;
+}
 
-  export function isValidIndex(index: MSquareIndex): boolean {
-    if (index.ci < 0 || index.ci > columnCount - 1) {
-      return false;
-    }
-    if (index.ri < 0 || index.ri > rowCount - 1) {
-      return false;
-    }
-    return true;
+export function isValidIndex(index: MSquareIndex): boolean {
+  if (index.ci < 0 || index.ci > columnCount - 1) {
+    return false;
   }
+  if (index.ri < 0 || index.ri > rowCount - 1) {
+    return false;
+  }
+  return true;
+}
 
-  export function isValidCode(code: MSquareCode): boolean {
-    if (code.length !== 2) {
-      return false;
-    }
-    const index = codeToIndex(code);
-    return isValidIndex(index);
+export function isValidCode(code: MSquareCode): boolean {
+  if (code.length !== 2) {
+    return false;
   }
+  const index = codeToIndex(code);
+  return isValidIndex(index);
+}
 
-  export function codeToIndex(code: MSquareCode): MSquareIndex {
-    const codeColumn = code[0];
-    const codeRow = code[1];
-    const ci = codeColumn.charCodeAt(0) - 'a'.charCodeAt(0);
-    const ri = rowCount - Number(codeRow);
-    return new MSquareIndex(ci, ri);
-  }
+export function codeToIndex(code: MSquareCode): MSquareIndex {
+  const codeColumn = code[0];
+  const codeRow = code[1];
+  const ci = codeColumn.charCodeAt(0) - 'a'.charCodeAt(0);
+  const ri = rowCount - Number(codeRow);
+  return new MSquareIndex(ci, ri);
+}
 
-  export function indexToCode(ci: number, ri: number): MSquareCode {
-    const column = String.fromCharCode('a'.charCodeAt(0) + ci);
-    const row = rowCount - ri;
-    return `${column}${row}`;
-  }
+export function indexToCode(ci: number, ri: number): MSquareCode {
+  const column = String.fromCharCode('a'.charCodeAt(0) + ci);
+  const row = rowCount - ri;
+  return `${column}${row}`;
+}
 
-  export function indexToCodeEx(index: MSquareIndex): MSquareCode {
-    return indexToCode(index.ci, index.ri);
-  }
+export function indexToCodeEx(index: MSquareIndex): MSquareCode {
+  return indexToCode(index.ci, index.ri);
+}
 
-  export function codeWithMove(code: MSquareCode, cm: number, rm: number): MSquareCode {
-    const index = codeToIndex(code);
-    return indexToCode(index.ci + cm, index.ri - rm);
-  }
+export function codeWithMove(code: MSquareCode, cm: number, rm: number): MSquareCode {
+  const index = codeToIndex(code);
+  return indexToCode(index.ci + cm, index.ri - rm);
+}
 
-  export function codeWithMoveEx(code: MSquareCode, codeMove: MCodeMove): MSquareCode {
-    return codeWithMove(code, codeMove.cm, codeMove.rm);
-  }
+export function codeWithMoveEx(code: MSquareCode, codeMove: MCodeMove): MSquareCode {
+  return codeWithMove(code, codeMove.cm, codeMove.rm);
 }
