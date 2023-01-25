@@ -4,6 +4,6 @@ export class MGameConfig {
   public strategy: MAIPlayerStrategy;
 
   public constructor(other?: Partial<MGameConfig>) {
-    this.strategy = (other?.strategy !== undefined ? other.strategy : MAIPlayerStrategy.Random);
+    this.strategy = (other?.strategy !== undefined ? other.strategy : MAIPlayerStrategy.DeepThinker);
   }
 }

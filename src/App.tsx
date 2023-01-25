@@ -7,10 +7,8 @@ import { GameLogComponent } from './features/GameLogComponent';
 import { Subject, tap } from 'rxjs';
 import { MBSPieceSide } from './models/board/board-square';
 import { GameControlsComponent } from './features/GameControlsComponent';
-import { PlayerInfoComponent } from './features/PlayerInfoComponent';
 import { MAIPlayer } from './models/ai-player/ai-player';
 import { MGame } from './models/game/game';
-import { GameInfoComponent } from './features/GameInfoComponent';
 import { GameHudComponent } from './features/GameHudComponent';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
@@ -34,8 +32,8 @@ class App extends React.Component<AppProps, AppState> {
   public constructor(props: AppProps) {
     super(props);
 
-    //this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
-    this.game = MGame.createWithFEN('3Q2kr/p3p2p/4N3/6N1/8/3B1P2/R1P3PP/4K2R b KQkq - 0 22');
+    this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    //this.game = MGame.createWithFEN('3Q2kr/p3p2p/4N3/6N1/8/3B1P2/R1P3PP/4K2R b KQkq - 0 22');
     //this.game = MGame.createWithFEN('1R6/7k/7p/8/6Q1/P7/8/8 w KQkq - 0 34');
     //this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
     //this.game = MGame.createWithFEN('r1bqk3/p2p1p2/2p3NQ/4p3/1p2P3/2P2P2/PP1P1P1P/RNB1KB1R w (cs) (ep) (hm) 12');

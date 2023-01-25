@@ -23,6 +23,7 @@ export class GameInfoComponent extends React.Component<GameInfoComponentProps> {
             onChange={(e) => this.props.onStrategyChanged(e.target.value as MAIPlayerStrategy)}>
             <MenuItem value={MAIPlayerStrategy.Random}>Random</MenuItem>
             <MenuItem value={MAIPlayerStrategy.Greedy}>Greedy</MenuItem>
+            <MenuItem value={MAIPlayerStrategy.DeepThinker}>Deep thinker</MenuItem>
           </Select>
         </FormControl>
         <TextField variant="outlined" label="Turn" value={turn} inputProps={{ readOnly: true }}/>

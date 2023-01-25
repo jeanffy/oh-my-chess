@@ -66,7 +66,7 @@ export class MGameState {
 }
 
 namespace MGameStateHelper {
-  export interface PieceColorState {
+  interface PieceColorState {
     check: boolean;
     checkmate: boolean;
   }

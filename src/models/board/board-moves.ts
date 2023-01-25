@@ -26,10 +26,12 @@ export class MBoardPossibleMove extends MBoardMove {
 
 export class MBoardValidMove extends MBoardPossibleMove {
   public nextBoard: MBoard;
+  public nextState: MGameState;
 
   public constructor(other?: Partial<MBoardValidMove>) {
     super(other);
     this.nextBoard = new MBoard(other?.nextBoard);
+    this.nextState = new MGameState(other?.nextState);
   }
 
   public getAlgebraicNotation(): string {
@@ -91,7 +93,11 @@ export namespace MBoardMoves {
       const nextState = MGameState.createFromBoard(nextBoard);
       const keepMove = (possibleMove.fromPiece.side === MBSPieceSide.Player1 ? !nextState.player1Check : !nextState.player2Check);
       if (keepMove) {
-        validMoves.push(new MBoardValidMove({ ...possibleMove, nextBoard: nextBoard }));
+        validMoves.push(new MBoardValidMove({
+          ...possibleMove,
+          nextBoard: nextBoard,
+          nextState: nextState
+        }));
       }
     }
     return validMoves;

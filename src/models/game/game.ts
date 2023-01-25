@@ -1,8 +1,8 @@
-import { MBoardValidMove } from '../board/board-moves';
+import { MBoardMoves, MBoardValidMove } from '../board/board-moves';
 import { MBoard } from '../board/board';
 import { MGameConfig } from './game-config';
 import { MGameNotations } from './game-notations';
-import { MBSPiece } from '../board/board-square';
+import { MBSPiece, MBSPieceSide } from '../board/board-square';
 import { MGameState } from './game-state';
 
 export class MGame {
@@ -25,11 +25,29 @@ export class MGame {
     return taken;
   }
 
+  public getAllValidMoves(pieceSide: MBSPieceSide): MBoardValidMove[] {
+    const allPossibleMoves = this.board.getAllPiecesWithPossibleMoves(pieceSide).flatMap(p => p.possibleMoves);
+    if (allPossibleMoves.length === 0) {
+      return [];
+    }
+    const allValidMoves = MBoardMoves.validMoves(this.state, this.board, { possibleMoves: allPossibleMoves });
+    return allValidMoves;
+  }
+
   public static createWithFEN(fen: string): MGame {
     const o = new MGame();
     const result = o.board.initWithFEN(fen);
     o.state = MGameState.createFromBoard(o.board);
     o.state.turn = result.turn;
+    o.notations = MGameNotations.createFromGame(o);
+    return o;
+  }
+
+  public static createWithBoad(board: MBoard, turn: MBSPieceSide): MGame {
+    const o = new MGame();
+    o.board = board;
+    o.state = MGameState.createFromBoard(o.board);
+    o.state.turn = turn;
     o.notations = MGameNotations.createFromGame(o);
     return o;
   }
