@@ -32,7 +32,8 @@ class App extends React.Component<AppProps, AppState> {
   public constructor(props: AppProps) {
     super(props);
 
-    this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    //this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    this.game = MGame.createWithFEN('8/8/8/8/pP6/8/8/8 b KQkq - 0 1');
     //this.game = MGame.createWithFEN('3Q2kr/p3p2p/4N3/6N1/8/3B1P2/R1P3PP/4K2R b KQkq - 0 22');
     //this.game = MGame.createWithFEN('1R6/7k/7p/8/6Q1/P7/8/8 w KQkq - 0 34');
     //this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
@@ -43,12 +44,13 @@ class App extends React.Component<AppProps, AppState> {
 
     this.state = {
       player1Autoplay: false,
-      player2Autoplay: true,
+      player2Autoplay: false,
       gameConfig: this.game.config,
       gameOverDialogOpen: false
     };
 
-    if (this.game.state.turn === MBSPieceSide.Player2) {
+    if ((this.game.state.turn === MBSPieceSide.Player1 && this.state.player1Autoplay) ||
+        (this.game.state.turn === MBSPieceSide.Player2 && this.state.player2Autoplay)) {
       this.doAIPlayerMove();
     }
   }

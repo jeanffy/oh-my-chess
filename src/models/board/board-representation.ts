@@ -66,6 +66,14 @@ export function codeToIndex(code: MSquareCode): MSquareIndex {
   return new MSquareIndex(ci, ri);
 }
 
+export function getCodeRow(code: MSquareCode): number {
+  return Number(code[1]);
+}
+
+export function getCodeColumn(code: MSquareCode): string {
+  return code[0].toLowerCase();
+}
+
 export function indexToCode(ci: number, ri: number): MSquareCode {
   const column = String.fromCharCode('a'.charCodeAt(0) + ci);
   const row = rowCount - ri;

@@ -23,6 +23,13 @@ describe('MBoardRepresentation', (): void => {
     expect(boardRepresentation.codeToIndex('h8')).toEqual(new boardRepresentation.MSquareIndex(7, 0));
   });
 
+  test('getCodeRow/Column', (): void => {
+    expect(boardRepresentation.getCodeRow('a1')).toEqual(1);
+    expect(boardRepresentation.getCodeRow('h8')).toEqual(8);
+    expect(boardRepresentation.getCodeColumn('a1')).toEqual('a');
+    expect(boardRepresentation.getCodeColumn('h8')).toEqual('h');
+  });
+
   test('indexToCode', (): void => {
     expect(boardRepresentation.indexToCode(0, 0)).toEqual('a8');
     expect(boardRepresentation.indexToCode(7, 7)).toEqual('h1');

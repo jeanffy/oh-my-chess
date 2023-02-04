@@ -19,10 +19,10 @@ export class MGame {
   }
 
   public boardMove(move: boardMoves.MBoardValidMove): MBSPiece | undefined {
-    const taken = this.board.move(move);
-    this.state.update(this.board, move, taken);
+    this.board.move(move);
+    this.state.update(this.board, move, move.take);
     this.notations = MGameNotations.createFromGame(this);
-    return taken;
+    return move.take;
   }
 
   public getAllValidMoves(pieceSide: MBSPieceSide): boardMoves.MBoardValidMove[] {

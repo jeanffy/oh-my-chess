@@ -21,10 +21,13 @@ export class MBSPiece {
   public side: MBSPieceSide;
   public strength: number;
 
+  public moveCount: number;
+
   public constructor(other?: Partial<MBSPiece>) {
     this.kind = (other?.kind !== undefined ? other.kind : MBSPieceKind.Pawn);
     this.side = (other?.side !== undefined ? other.side : MBSPieceSide.Player1);
     this.strength = (other?.strength !== undefined ? other.strength : 0);
+    this.moveCount = (other?.moveCount !== undefined ? other.moveCount : 0);
   }
 
   public getAlgebraicLetter(): string {

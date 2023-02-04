@@ -119,19 +119,16 @@ export class MBoard {
     return this.squareAt(code, codeMove.cm, codeMove.rm);
   }
 
-  public move(move: boardMoves.MBoardMove): MBSPiece | undefined {
-    let takenPiece: MBSPiece | undefined;
-
+  public move(move: boardMoves.MBoardMove): void {
     const squareTo = this.squareAt(move.to);
-    if (squareTo.piece !== undefined) {
-      takenPiece = squareTo.piece;
-    }
-
     squareTo.piece = move.fromPiece;
+    move.fromPiece.moveCount++;
     const squareFrom = this.squareAt(move.from);
     squareFrom.piece = undefined;
-
-    return takenPiece;
+    if (move.removeAt !== undefined) {
+      const squareToRemove = this.squareAt(move.removeAt);
+      squareToRemove.piece = undefined;
+    }
   }
 
   public setSquare(code: boardRepresentation.MSquareCode, kind: MBSPieceKind, color: MBSPieceSide, strength: number): void {
