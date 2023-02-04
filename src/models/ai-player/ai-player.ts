@@ -11,7 +11,7 @@ export enum MAIPlayerStrategy {
   DeepThinker
 }
 
-const fakeThinkingDelay = 100;
+const fakeThinkingDelay = 500;
 
 export class MAIPlayer {
   public constructor(private game: MGame) {
@@ -26,6 +26,7 @@ export class MAIPlayer {
         await new Promise(resolve => setTimeout(resolve, fakeThinkingDelay)); // to simulate some thinking
         return new MAIPlayerStrategyGreedy(this.game).getNextMove(side);
       case MAIPlayerStrategy.DeepThinker:
+        await new Promise(resolve => setTimeout(resolve, fakeThinkingDelay)); // to simulate some thinking (to be removed when strategy is implemented)
         return new MAIPlayerStrategyDeepThinker(this.game).getNextMove(side)
     }
   }

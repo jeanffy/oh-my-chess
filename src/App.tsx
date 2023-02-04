@@ -46,7 +46,7 @@ class App extends React.Component<AppProps, AppState> {
 
     this.state = {
       player1Autoplay: false,
-      player2Autoplay: false,
+      player2Autoplay: true,
       gameConfig: this.game.config,
       gameOverDialogOpen: false
     };

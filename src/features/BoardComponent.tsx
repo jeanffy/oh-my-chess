@@ -115,11 +115,28 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
           />
         )
       }
-      squares.push(<tr className="square"><td className="border-left">{r + 1}</td>{rowSquares}</tr>);
+      squares.push(
+        <tr className="square">
+          <td className="border-left">{r + 1}</td>
+          {rowSquares}
+          <td className="border-left">{r + 1}</td>
+        </tr>
+      );
     }
     return (
       <table className="board">
         <tbody>
+          <tr>
+            <td></td>
+            <td className="border-bottom">a</td>
+            <td className="border-bottom">b</td>
+            <td className="border-bottom">c</td>
+            <td className="border-bottom">d</td>
+            <td className="border-bottom">e</td>
+            <td className="border-bottom">f</td>
+            <td className="border-bottom">g</td>
+            <td className="border-bottom">h</td>
+          </tr>
           {squares}
           <tr>
             <td></td>

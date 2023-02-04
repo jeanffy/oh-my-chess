@@ -5,6 +5,7 @@ import { Card, CardHeader, CardContent } from '@mui/material';
 export interface PlayerInfoProps {
   title: string;
   materialScore: number;
+  toMove: boolean;
   check: boolean;
   checkmate: boolean;
 }
@@ -19,9 +20,13 @@ export class PlayerInfoComponent extends React.Component<PlayerInfoProps> {
     if (this.props.checkmate) {
       checkmateValue = <td className="value emphasis">true</td>;
     }
+    let titleClass = '';
+    if (this.props.toMove) {
+      titleClass = 'to-move';
+    }
     return (
       <Card variant="outlined">
-        <CardHeader title={this.props.title}/>
+        <CardHeader title={this.props.title} className={titleClass}/>
         <CardContent>
           <table className="player-info">
             <tr>
