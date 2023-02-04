@@ -16,7 +16,7 @@ const rookPoints = 5;
 export function populateBoardWithFENNotation(board: MBoard, fen: string): MBoardInitPopulateWithFENResult {
   const fields = fen.split(' ');
   let ci = 0;
-  let ri = 0;
+  let ri = 7; // fen notation goes from row 8 to row 1, so our starting index is 7
   const fenLines = fields[0].split('/');
   for (const fenLine of fenLines) {
     ci = 0;
@@ -25,7 +25,7 @@ export function populateBoardWithFENNotation(board: MBoard, fen: string): MBoard
       if (!isNaN(Number.parseInt(c))) {
         ci += Number.parseInt(c);
       } else {
-        const code = boardRepresentation.indexToCode(ci, ri);
+        const code = boardRepresentation.indexToCode({ ci: ci, ri: ri });
         switch (c) {
           case 'B': board.setSquare(code, MBSPieceKind.Bishop, MBSPieceSide.Player1, bishopPoints); break;
           case 'K': board.setSquare(code, MBSPieceKind.King, MBSPieceSide.Player1, kingPoints); break;
@@ -43,7 +43,7 @@ export function populateBoardWithFENNotation(board: MBoard, fen: string): MBoard
         ci++;
       }
     }
-    ri++;
+    ri--;
   }
   const turn = fields[1];
 

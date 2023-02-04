@@ -7,13 +7,11 @@ export class MBoardMove {
   public fromPiece: MBSPiece;
   public from: boardRepresentation.MSquareCode;
   public to: boardRepresentation.MSquareCode;
-  public removeAt?: boardRepresentation.MSquareCode; // TODO: do better
 
   public constructor(other?: Partial<MBoardMove>) {
     this.fromPiece = new MBSPiece(other?.fromPiece);
     this.from = (other?.from !== undefined ? other.from : '');
     this.to = (other?.to !== undefined ? other.to : '');
-    this.removeAt = other?.removeAt;
   }
 }
 
@@ -62,7 +60,7 @@ const player2PawnEnPassantRow = 4;
 
 export function computePossibleMoves(board: MBoard, args: MPossibleMovesArgs): MBoardPossibleMove[] {
   const fromSquare = board.squareAt(args.from);
-  if (fromSquare.piece === undefined) {
+  if (fromSquare?.piece === undefined) {
     return [];
   }
   const fromPiece = fromSquare.piece;
@@ -140,42 +138,26 @@ function possibleMovesKnight(board: MBoard, args: MPossibleMovesInternalArgs): M
   ], args);
 }
 
-function pieceAt(board: MBoard, from: boardRepresentation.MSquareCode, codeMove: boardRepresentation.MCodeMove): MBSPiece | undefined {
-  let piece: MBSPiece | undefined;
-  const code = boardRepresentation.codeWithMoveEx(from, codeMove);
-  if (boardRepresentation.isValidCode(code)) {
-    piece = board.squareAtEx(from, codeMove).piece;
-  }
-  return piece;
-}
-
 function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
   const moves: MBoardPossibleMove[] = [];
 
-  const pieceRow = boardRepresentation.getCodeRow(board.squareAt(args.from).code);
+  const pieceRow = boardRepresentation.extractRow(args.from);
 
-  const codeMove1Ahead = new boardRepresentation.MCodeMove(0, (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
-  const code1Ahead = boardRepresentation.codeWithMoveEx(args.from, codeMove1Ahead);
-  let piece1Ahead: MBSPiece | undefined;
-  if (boardRepresentation.isValidCode(code1Ahead)) {
-    piece1Ahead = board.squareAtEx(args.from, codeMove1Ahead).piece;
-    if (piece1Ahead === undefined) {
-      const to = boardRepresentation.codeWithMoveEx(args.from, codeMove1Ahead);
-      moves.push(new MBoardPossibleMove({
-        fromPiece: args.piece,
-        from: args.from,
-        to: to,
-        take: undefined
-      }));
-    }
+  const code1Ahead = boardRepresentation.codeWithMove(args.from, 0, (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
+  const piece1Ahead = board.pieceAt(code1Ahead);
+  if (piece1Ahead === undefined) {
+    moves.push(new MBoardPossibleMove({
+      fromPiece: args.piece,
+      from: args.from,
+      to: code1Ahead,
+      take: undefined
+    }));
   }
 
   // if pawn is at its initial position, it can then move 2 squares ahead
   if (args.piece.moveCount === 0) {
-    const codeMove2Ahead = new boardRepresentation.MCodeMove(0, (args.piece.side === MBSPieceSide.Player1 ? 2 : -2));
-    const code2Ahead = boardRepresentation.codeWithMoveEx(args.from, codeMove2Ahead);
-    if (boardRepresentation.isValidCode(code2Ahead) &&
-        piece1Ahead === undefined && board.squareAtEx(args.from, codeMove2Ahead).piece === undefined) {
+    const code2Ahead = boardRepresentation.codeWithMove(args.from, 0, (args.piece.side === MBSPieceSide.Player1 ? 2 : -2));
+    if (piece1Ahead === undefined && board.pieceAt(code2Ahead) === undefined) {
       moves.push(new MBoardPossibleMove({
         fromPiece: args.piece,
         from: args.from,
@@ -185,32 +167,26 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
     }
   }
 
-  const codeMoveTopRight = new boardRepresentation.MCodeMove((args.piece.side === MBSPieceSide.Player1 ? 1 : -1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
-  const codeTopRight = boardRepresentation.codeWithMoveEx(args.from, codeMoveTopRight);
-  if (boardRepresentation.isValidCode(codeTopRight)) {
-    const pieceTopRight = board.squareAtEx(args.from, codeMoveTopRight).piece;
-    if (pieceTopRight !== undefined && pieceTopRight.side !== args.piece.side) {
-      moves.push(new MBoardPossibleMove({
-        fromPiece: args.piece,
-        from: args.from,
-        to: codeTopRight,
-        take: pieceTopRight
-      }));
-    }
+  const codeTopRight = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? 1 : -1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
+  const pieceTopRight = board.pieceAt(codeTopRight);
+  if (pieceTopRight !== undefined && pieceTopRight.side !== args.piece.side) {
+    moves.push(new MBoardPossibleMove({
+      fromPiece: args.piece,
+      from: args.from,
+      to: codeTopRight,
+      take: pieceTopRight
+    }));
   }
 
-  const codeMoveTopLeft = new boardRepresentation.MCodeMove((args.piece.side === MBSPieceSide.Player1 ? -1 : 1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
-  const codeTopLeft = boardRepresentation.codeWithMoveEx(args.from, codeMoveTopLeft);
-  if (boardRepresentation.isValidCode(codeTopLeft)) {
-    const pieceTopLeft = board.squareAtEx(args.from, codeMoveTopLeft).piece;
-    if (pieceTopLeft !== undefined && pieceTopLeft.side !== args.piece.side) {
-      moves.push(new MBoardPossibleMove({
-        fromPiece: args.piece,
-        from: args.from,
-        to: codeTopLeft,
-        take: pieceTopLeft
-      }));
-    }
+  const codeTopLeft = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? -1 : 1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
+  const pieceTopLeft = board.pieceAt(codeTopLeft);
+  if (pieceTopLeft !== undefined && pieceTopLeft.side !== args.piece.side) {
+    moves.push(new MBoardPossibleMove({
+      fromPiece: args.piece,
+      from: args.from,
+      to: codeTopLeft,
+      take: pieceTopLeft
+    }));
   }
 
   // if pawn is as the row where it can make "en passant" move
@@ -223,32 +199,28 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
   }
   if (enPassantPossible) {
     // left/right are inverted if this is player2
-    const codeMoveLeft = new boardRepresentation.MCodeMove((args.piece.side === MBSPieceSide.Player1 ? -1 : 1), 0);
-    const codeMoveRight = new boardRepresentation.MCodeMove((args.piece.side === MBSPieceSide.Player1 ? 1 : -1), 0);
-    const pieceLeft = pieceAt(board, args.from, codeMoveLeft);
-    const pieceRight = pieceAt(board, args.from, codeMoveRight);
+    const codeLeft = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? -1 : 1), 0);
+    const pieceLeft = board.pieceAt(codeLeft);
     if (pieceLeft !== undefined && pieceLeft.side !== args.piece.side && pieceLeft.moveCount === 0) {
-      const codeMoveTopLeft = new boardRepresentation.MCodeMove((args.piece.side === MBSPieceSide.Player1 ? -1 : 1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
-      const codeTopLeft = boardRepresentation.codeWithMoveEx(args.from, codeMoveTopLeft);
-      if (boardRepresentation.isValidCode(codeTopLeft)) {
+      const codeTopLeft = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? -1 : 1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
+      if (boardRepresentation.isValidCode(codeTopLeft, board.columnCount, board.rowCount)) {
         moves.push(new MBoardPossibleMove({
           fromPiece: args.piece,
           from: args.from,
           to: codeTopLeft,
-          removeAt: boardRepresentation.codeWithMoveEx(args.from, codeMoveLeft),
           take: pieceLeft
         }));
       }
     }
+    const codeRight = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? -1 : 1), 0);
+    const pieceRight = board.pieceAt(codeRight);
     if (pieceRight !== undefined && pieceRight.side !== args.piece.side && pieceRight.moveCount === 0) {
-      const codeMoveTopRight = new boardRepresentation.MCodeMove((args.piece.side === MBSPieceSide.Player1 ? 1 : -1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
-      const codeTopRight = boardRepresentation.codeWithMoveEx(args.from, codeMoveTopRight);
-      if (boardRepresentation.isValidCode(codeTopRight)) {
+      const codeTopRight = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? 1 : -1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
+      if (boardRepresentation.isValidCode(codeTopRight, board.columnCount, board.rowCount)) {
         moves.push(new MBoardPossibleMove({
           fromPiece: args.piece,
           from: args.from,
           to: codeTopRight,
-          removeAt: boardRepresentation.codeWithMoveEx(args.from, codeMoveRight),
           take: pieceRight
         }));
       }
@@ -289,27 +261,27 @@ function getPossibleMoves(board: MBoard, increments: MMoveIncrement[], args: MPo
   const moves: MBoardPossibleMove[] = [];
 
   for (const increment of increments) {
-    const move = new boardRepresentation.MCodeMove(increment.h, increment.v);
-    const nextCode = boardRepresentation.codeWithMoveEx(args.from, move);
-    if (boardRepresentation.isValidCode(nextCode)) {
-      const nextSquare = board.squareAtEx(args.from, move);
-      if (nextSquare.piece !== undefined) {
-        if (nextSquare.piece.side !== args.piece.side) {
-          moves.push(new MBoardPossibleMove({
-            fromPiece: args.piece,
-            from: args.from,
-            to: nextCode,
-            take: nextSquare.piece
-          }));
-        }
-      } else {
+    const nextCode = boardRepresentation.codeWithMove(args.from, increment.h, increment.v);
+    const nextSquare = board.squareAt(nextCode);
+    if (nextSquare === undefined) {
+      continue;
+    }
+    if (nextSquare.piece !== undefined) {
+      if (nextSquare.piece.side !== args.piece.side) {
         moves.push(new MBoardPossibleMove({
           fromPiece: args.piece,
           from: args.from,
           to: nextCode,
-          take: undefined
+          take: nextSquare.piece
         }));
       }
+    } else {
+      moves.push(new MBoardPossibleMove({
+        fromPiece: args.piece,
+        from: args.from,
+        to: nextCode,
+        take: undefined
+      }));
     }
   }
 
@@ -319,28 +291,28 @@ function getPossibleMoves(board: MBoard, increments: MMoveIncrement[], args: MPo
 function iteratePossibleMoves(board: MBoard, incrementHorizontal: number, incrementVertical: number, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
   const moves: MBoardPossibleMove[] = [];
 
-  const move = new boardRepresentation.MCodeMove(incrementHorizontal, incrementVertical);
-  let nextCode = boardRepresentation.codeWithMoveEx(args.from, move);
-  while (boardRepresentation.isValidCode(nextCode) && board.squareAtEx(args.from, move).piece === undefined) {
+  let cm = incrementHorizontal;
+  let rm = incrementVertical;
+  let nextCode = boardRepresentation.codeWithMove(args.from, cm, rm);
+  let nextSquare = board.squareAt(nextCode);
+  while (nextSquare !== undefined && nextSquare.piece === undefined) {
     moves.push(new MBoardPossibleMove({
       fromPiece: args.piece,
       from: args.from,
       to: nextCode,
       take: undefined
     }));
-    move.cm += incrementHorizontal;
-    move.rm += incrementVertical;
-    nextCode = boardRepresentation.codeWithMoveEx(args.from, move);
+    cm += incrementHorizontal;
+    rm += incrementVertical;
+    nextCode = boardRepresentation.codeWithMove(args.from, cm, rm);
+    nextSquare = board.squareAt(nextCode);
   }
-  if (boardRepresentation.isValidCode(nextCode) &&
-      board.squareAtEx(args.from, move).piece !== undefined &&
-      board.squareAtEx(args.from, move).piece?.side !== args.piece.side) {
-    const to = boardRepresentation.codeWithMoveEx(args.from, move);
+  if (nextSquare !== undefined && nextSquare.piece !== undefined && nextSquare.piece.side !== args.piece.side) {
     moves.push(new MBoardPossibleMove({
       fromPiece: args.piece,
       from: args.from,
-      to: to,
-      take: board.squareAtEx(args.from, move).piece
+      to: nextCode,
+      take: nextSquare.piece
     }));
   }
 

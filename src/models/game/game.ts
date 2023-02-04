@@ -20,7 +20,7 @@ export class MGame {
 
   public boardMove(move: boardMoves.MBoardValidMove): MBSPiece | undefined {
     this.board.move(move);
-    this.state.update(this.board, move, move.take);
+    this.state.update(this.board, move);
     this.notations = MGameNotations.createFromGame(this);
     return move.take;
   }
@@ -35,20 +35,20 @@ export class MGame {
   }
 
   public static createWithFEN(fen: string): MGame {
-    const o = new MGame();
-    const result = o.board.initWithFEN(fen);
-    o.state = MGameState.createFromBoard(o.board);
-    o.state.turn = result.turn;
-    o.notations = MGameNotations.createFromGame(o);
-    return o;
+    const game = new MGame();
+    const result = game.board.initWithFEN(fen);
+    game.state = MGameState.createFromBoard(game.board);
+    game.state.turn = result.turn;
+    game.notations = MGameNotations.createFromGame(game);
+    return game;
   }
 
-  public static createWithBoad(board: MBoard, turn: MBSPieceSide): MGame {
-    const o = new MGame();
-    o.board = board;
-    o.state = MGameState.createFromBoard(o.board);
-    o.state.turn = turn;
-    o.notations = MGameNotations.createFromGame(o);
-    return o;
+  public static createWithBoard(board: MBoard, turn: MBSPieceSide): MGame {
+    const game = new MGame();
+    game.board = board;
+    game.state = MGameState.createFromBoard(game.board);
+    game.state.turn = turn;
+    game.notations = MGameNotations.createFromGame(game);
+    return game;
   }
 }

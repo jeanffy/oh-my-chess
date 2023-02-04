@@ -9,9 +9,9 @@ export class MGameNotations {
   }
 
   public static createFromGame(game: MGame): MGameNotations {
-    const o = new MGameNotations();
-    o.fen = getFENNotation(game);
-    return o;
+    const notations = new MGameNotations();
+    notations.fen = getFENNotation(game);
+    return notations;
   }
 }
 
@@ -19,7 +19,7 @@ function getFENNotation(game: MGame): string {
   // based on https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   let fen = '';
   const fenLines: string[] = [];
-  for (let ri = 0; ri < game.board.rowCount; ri++) {
+  for (let ri = game.board.rowCount - 1; ri >= 0; ri--) {
     let fenLine = '';
     let numberOfEmpty = 0;
     for (let ci = 0; ci < game.board.columnCount; ci++) {

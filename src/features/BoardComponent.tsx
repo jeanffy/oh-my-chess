@@ -73,7 +73,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
       return;
     }
 
-    // if another piece of same color is clicked -> change selection
+    // if another piece of same side is clicked -> change selection
     if (square.piece !== undefined && square.piece.side === selectedSquare.piece.side) {
       this.setState({ selectedSquare: square });
       return;
@@ -100,15 +100,11 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
     }
 
     const squares = [];
-    for (let r = 0; r < this.props.gameBoard.rowCount; r++) {
+    for (let r = this.props.gameBoard.rowCount - 1; r >= 0; r--) {
       const rowSquares = [];
       for (let c = 0; c < this.props.gameBoard.columnCount; c++) {
         const square = this.props.gameBoard.squares[c][r];
         const lastMove = this.props.gameState.getLastMove();
-        if (square.code === 'e4') {
-          console.log(square);
-          console.log(validMoves);
-        }
         rowSquares.push(
           <SquareComponent
             square={square}
@@ -119,7 +115,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
           />
         )
       }
-      squares.push(<tr className="square"><td className="border-left">{this.props.gameBoard.rowCount - r}</td>{rowSquares}</tr>);
+      squares.push(<tr className="square"><td className="border-left">{r + 1}</td>{rowSquares}</tr>);
     }
     return (
       <table className="board">

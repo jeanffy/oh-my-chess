@@ -19,7 +19,7 @@ export class GameHudComponent extends React.Component<GameHudComponentProps> {
         <div className="players">
           <div className="player">
             <PlayerInfoComponent
-              title="Player 1"
+              title="Player 1 (bottom)"
               materialScore={this.props.gameState.materialScores.player1}
               check={this.props.gameState.player1Check}
               checkmate={this.props.gameState.player1Checkmate}
@@ -27,7 +27,7 @@ export class GameHudComponent extends React.Component<GameHudComponentProps> {
           </div>
           <div className="player">
             <PlayerInfoComponent
-              title="Player 2"
+              title="Player 2 (top)"
               materialScore={this.props.gameState.materialScores.player2}
               check={this.props.gameState.player2Check}
               checkmate={this.props.gameState.player2Checkmate}

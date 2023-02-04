@@ -13,5 +13,5 @@ export abstract class MAIPlayerStrategy {
     });
   }
 
-  public abstract nextMove(color: MBSPieceSide): MBoardValidMove | undefined;
+  public abstract nextMove(side: MBSPieceSide): MBoardValidMove | undefined;
 }

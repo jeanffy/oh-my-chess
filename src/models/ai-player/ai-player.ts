@@ -17,16 +17,16 @@ export class MAIPlayer {
   public constructor(private game: MGame) {
   }
 
-  public async getNextMove(color: MBSPieceSide, strategy: MAIPlayerStrategy): Promise<MBoardValidMove | undefined> {
+  public async getNextMove(side: MBSPieceSide, strategy: MAIPlayerStrategy): Promise<MBoardValidMove | undefined> {
     switch (strategy) {
       case MAIPlayerStrategy.Random:
         await new Promise(resolve => setTimeout(resolve, fakeThinkingDelay)); // to simulate some thinking
-        return new MAIPlayerStrategyRandom(this.game).getNextMove(color);
+        return new MAIPlayerStrategyRandom(this.game).getNextMove(side);
       case MAIPlayerStrategy.Greedy:
         await new Promise(resolve => setTimeout(resolve, fakeThinkingDelay)); // to simulate some thinking
-        return new MAIPlayerStrategyGreedy(this.game).getNextMove(color);
+        return new MAIPlayerStrategyGreedy(this.game).getNextMove(side);
       case MAIPlayerStrategy.DeepThinker:
-        return new MAIPlayerStrategyDeepThinker(this.game).getNextMove(color)
+        return new MAIPlayerStrategyDeepThinker(this.game).getNextMove(side)
     }
   }
 }

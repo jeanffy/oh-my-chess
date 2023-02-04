@@ -1,6 +1,7 @@
 import { MBoardPossibleMove, MBoardValidMove } from '../board/board-moves';
-import { MBoard, MBoardMaterialScores } from '../board/board';
-import { MBSPieceSide, MBSPieceKind, MBSPiece } from '../board/board-square';
+import { MBoard } from '../board/board';
+import { MBSPieceSide, MBSPieceKind } from '../board/board-square';
+import { MBoardMaterialScores } from '../board/board-material-score';
 
 export class MGameState {
   public turn: MBSPieceSide;
@@ -31,41 +32,45 @@ export class MGameState {
     return (this.moves.length === 0 ? undefined : this.moves[this.moves.length - 1]);
   }
 
-  public update(board: MBoard, move: MBoardValidMove, takenPiece?: MBSPiece): void {
-    this.moves.push(move);
+  public update(board: MBoard, move?: MBoardValidMove): void {
+    if (move !== undefined) {
+      this.moves.push(move);
 
-    this.turn = (this.turn === MBSPieceSide.Player1 ? MBSPieceSide.Player2 : MBSPieceSide.Player1);
+      this.turn = (this.turn === MBSPieceSide.Player1 ? MBSPieceSide.Player2 : MBSPieceSide.Player1);
 
-    if (this.turn === MBSPieceSide.Player1) {
-      this.fullMoves++;
-    }
+      if (this.turn === MBSPieceSide.Player1) {
+        this.fullMoves++;
+      }
 
-    this.halfMoves++;
-    if (takenPiece !== undefined || move.fromPiece.kind === MBSPieceKind.Pawn) {
-      this.halfMoves = 0;
+      this.halfMoves++;
+      if (move.take !== undefined || move.fromPiece.kind === MBSPieceKind.Pawn) {
+        this.halfMoves = 0;
+      }
     }
 
     this.materialScores = MBoardMaterialScores.createFromBoard(board);
-  }
 
-  public static createFromBoard(board: MBoard): MGameState {
     const p1PossibleMoves = board.getAllPiecesWithPossibleMoves(MBSPieceSide.Player1).flatMap(p => p.possibleMoves);
     const p2PossibleMoves = board.getAllPiecesWithPossibleMoves(MBSPieceSide.Player2).flatMap(p => p.possibleMoves);
 
     const p1State = computePlayerState(board, MBSPieceSide.Player1, p1PossibleMoves, p2PossibleMoves);
     const p2State = computePlayerState(board, MBSPieceSide.Player2, p2PossibleMoves, p1PossibleMoves);
 
+    this.stalemate = false; // TODO: detect stalemate
+    this.player1Check = p1State.check;
+    this.player1Checkmate = p1State.checkmate;
+    this.player2Check = p2State.check;
+    this.player2Checkmate = p2State.checkmate;
+  }
+
+  public static createFromBoard(board: MBoard): MGameState {
     const newBoardState = new MGameState();
-    newBoardState.stalemate = false; // TODO: detect stalemate
-    newBoardState.player1Check = p1State.check;
-    newBoardState.player1Checkmate = p1State.checkmate;
-    newBoardState.player2Check = p2State.check;
-    newBoardState.player2Checkmate = p2State.checkmate;
+    newBoardState.update(board);
     return newBoardState;
   }
 }
 
-interface PieceColorState {
+interface PieceSideState {
   check: boolean;
   checkmate: boolean;
 }
@@ -73,7 +78,7 @@ interface PieceColorState {
 export function computePlayerState(board: MBoard,
                                   playerSide: MBSPieceSide,
                                   playerPossibleMoves: MBoardPossibleMove[],
-                                  opponentPossibleMoves: MBoardPossibleMove[]): PieceColorState {
+                                  opponentPossibleMoves: MBoardPossibleMove[]): PieceSideState {
   const opponentSide = (playerSide === MBSPieceSide.Player1 ? MBSPieceSide.Player2 : MBSPieceSide.Player1);
 
   // - a player is in check state if any of the opponent's possible moves takes his king
