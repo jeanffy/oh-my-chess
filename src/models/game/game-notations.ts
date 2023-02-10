@@ -1,5 +1,6 @@
 import { MGame } from './game';
 import { MBSPieceKind, MBSPieceSide } from '../board/board-square';
+import { MBMoveKind } from '../board/board-moves';
 
 export class MGameNotations {
   public fen: string;
@@ -17,6 +18,7 @@ export class MGameNotations {
 
 function getFENNotation(game: MGame): string {
   // based on https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+  // see also https://ia802908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt (chapter 16.1: FEN)
   let fen = '';
   const fenLines: string[] = [];
   for (let ri = game.board.rowCount - 1; ri >= 0; ri--) {
@@ -62,17 +64,28 @@ function getFENNotation(game: MGame): string {
   }
   fen += fenLines.join('/');
   fen += ' ';
+
   switch (game.state.turn) {
     case MBSPieceSide.Player1: fen += 'w'; break;
     case MBSPieceSide.Player2: fen += 'b'; break;
   }
   fen += ' ';
+
   fen += '(cs)';
   fen += ' ';
-  fen += '(ep)';
+
+  const lastMove = game.state.getLastMove();
+  if (lastMove !== undefined && lastMove.moveKind === MBMoveKind.PawnAdvanceTwoSquares) {
+    fen += lastMove.to;
+  } else {
+    fen += '-';
+  }
   fen += ' ';
+
   fen += `${game.state.halfMoves}`;
   fen += ' ';
+
   fen += `${game.state.fullMoves}`;
+
   return fen;
 }

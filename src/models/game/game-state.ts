@@ -43,7 +43,7 @@ export class MGameState {
       }
 
       this.halfMoves++;
-      if (move.take !== undefined || move.fromPiece.kind === MBSPieceKind.Pawn) {
+      if (move.takenPiece !== undefined || move.fromPiece.kind === MBSPieceKind.Pawn) {
         this.halfMoves = 0;
       }
     }
@@ -84,13 +84,13 @@ export function computePlayerState(board: MBoard,
   // - a player is in check state if any of the opponent's possible moves takes his king
   // - a player is in checkmate state if all of his possible moves still leaves him in a check state
 
-  const check = opponentPossibleMoves.some(m => m.take?.kind === MBSPieceKind.King);
+  const check = opponentPossibleMoves.some(m => m.takenPiece?.kind === MBSPieceKind.King);
 
   let checkmate = true;
   for (const move of playerPossibleMoves) {
     const nextBoard = board.cloneWithMove(move);
     const nextOpponentPossibleMoves = nextBoard.getAllPiecesWithPossibleMoves(opponentSide).flatMap(p => p.possibleMoves);
-    if (!nextOpponentPossibleMoves.some(m => m.take?.kind === MBSPieceKind.King)) {
+    if (!nextOpponentPossibleMoves.some(m => m.takenPiece?.kind === MBSPieceKind.King)) {
       checkmate = false; // at least one move is possible without taking the king -> not in checkmate
       break;
     }

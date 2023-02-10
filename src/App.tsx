@@ -33,6 +33,7 @@ class App extends React.Component<AppProps, AppState> {
     super(props);
 
     this.game = MGame.createWithFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    //this.game = MGame.createWithFEN('rnbqkbnr/ppp1p2p/3p4/5Pp1/2B5/8/PPPP1PPP/RNBQK1NR w (cs) g6 0 3');
     //this.game = MGame.createWithFEN('rnbqkbnr/1pppp3/p4pp1/7Q/8/4P2N/PPPP1PPP/RNB1KB1R w (cs) (ep) 0 1');
     //this.game = MGame.createWithFEN('8/p7/8/8/8/8/8/8 w KQkq - 0 1');
     //this.game = MGame.createWithFEN('8/8/8/8/pP6/8/8/8 b KQkq - 0 1');

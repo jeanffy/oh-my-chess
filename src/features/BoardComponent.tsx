@@ -12,7 +12,7 @@ export interface BoardActionEvent {
 }
 
 export interface BoardActionDoneEvent {
-  move: boardMoves.MBoardMove;
+  move: boardMoves.MBoardPossibleMove;
   taken?: MBSPiece;
   autoPlay: boolean;
 }
@@ -80,7 +80,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
     }
 
     // another piece already selected -> move
-    const validMoves = boardMoves.computeValidMoves(this.props.gameState, this.props.gameBoard, { from: selectedSquare.code });
+    const validMoves = boardMoves.computeValidMoves(this.props.gameBoard, { from: selectedSquare.code });
     const validMove = validMoves.find(m => m.to === square.code);
     if (validMove !== undefined) {
       this.props.boardActionEvent.next({
@@ -96,7 +96,7 @@ export class BoardComponent extends React.Component<BoardComponentProps, BoardCo
   public render(): React.ReactNode {
     let validMoves: boardMoves.MBoardValidMove[] = [];
     if (this.state.selectedSquare !== undefined) {
-      validMoves = boardMoves.computeValidMoves(this.props.gameState, this.props.gameBoard, { from: this.state.selectedSquare.code });
+      validMoves = boardMoves.computeValidMoves(this.props.gameBoard, { from: this.state.selectedSquare.code });
     }
 
     const squares = [];

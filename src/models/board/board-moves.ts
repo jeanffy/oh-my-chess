@@ -3,30 +3,38 @@ import { MBoard } from './board';
 import { MBSPiece, MBSPieceSide, MBSPieceKind } from './board-square';
 import { MGameState } from '../game/game-state';
 
-export class MBoardMove {
-  public fromPiece: MBSPiece;
-  public from: boardRepresentation.MSquareCode;
-  public to: boardRepresentation.MSquareCode;
+export enum MBMoveKind {
+  Standard,
+  PawnAdvanceTwoSquares,
+  Taking,
+  CaslingKingside,
+  CastlingQueenside,
+  EnPassant, // this kind implies kind 'Taking'
+  Promotion
+}
 
-  public constructor(other?: Partial<MBoardMove>) {
+// represents a move on the board, in terms of allowed pieces movements only
+// for instance, such a move can be a move that puts the player's king in check state, which is not a valid move
+export class MBoardPossibleMove {
+  public fromPiece: MBSPiece; // the piece that moves
+  public from: boardRepresentation.MSquareCode; // from that square
+  public to: boardRepresentation.MSquareCode; // to that square
+  public takenPiece?: MBSPiece; // the piece that is taken, if any
+  public moveKind: MBMoveKind;
+
+  public constructor(other?: Partial<MBoardPossibleMove>) {
     this.fromPiece = new MBSPiece(other?.fromPiece);
     this.from = (other?.from !== undefined ? other.from : '');
     this.to = (other?.to !== undefined ? other.to : '');
+    this.takenPiece = (other?.takenPiece !== undefined ? new MBSPiece(other?.takenPiece) : undefined);
+    this.moveKind = (other?.moveKind !== undefined ? other.moveKind : MBMoveKind.Standard);
   }
 }
 
-export class MBoardPossibleMove extends MBoardMove {
-  public take?: MBSPiece;
-
-  public constructor(other?: Partial<MBoardPossibleMove>) {
-    super(other);
-    this.take = (other?.take !== undefined ? new MBSPiece(other?.take) : undefined);
-  }
-}
-
+// represents a valid move, that is playable regarding allowed pieces movements and chess rules
 export class MBoardValidMove extends MBoardPossibleMove {
-  public nextBoard: MBoard;
-  public nextState: MGameState;
+  public nextBoard: MBoard; // the future board after that move (if that move is played)
+  public nextState: MGameState; // the future game state after that move (if that move is played)
 
   public constructor(other?: Partial<MBoardValidMove>) {
     super(other);
@@ -35,28 +43,25 @@ export class MBoardValidMove extends MBoardPossibleMove {
   }
 
   public getAlgebraicNotation(): string {
-    const pieceLetter = this.fromPiece.getAlgebraicLetter();
-    const fromLetter = this.from[0];
-    const take = (this.take !== undefined ? 'x' : '');
-    return `${pieceLetter}${fromLetter}${take}${this.to}`;
+    const pieceLetter = (this.fromPiece.kind === MBSPieceKind.Pawn ? '' : this.fromPiece.getAlgebraicLetter());
+    const fromLetter = (this.fromPiece.kind === MBSPieceKind.Pawn ? '' : boardRepresentation.extractColumn(this.from));
+
+    let take = (this.takenPiece !== undefined ? 'x' : '');
+
+    const destination = this.to;
+
+    let suffix = '';
+    if (this.moveKind === MBMoveKind.EnPassant) {
+      suffix = 'e.p.';
+    }
+
+    return `${pieceLetter}${fromLetter}${take}${destination} ${suffix}`.trim();
   }
 }
 
 export interface MPossibleMovesArgs {
   from: boardRepresentation.MSquareCode;
 }
-
-interface MPossibleMovesInternalArgs extends MPossibleMovesArgs {
-  piece: MBSPiece;
-}
-
-export interface MValidMovesArgs {
-  from?: boardRepresentation.MSquareCode;
-  possibleMoves?: MBoardPossibleMove[];
-}
-
-const player1PawnEnPassantRow = 5;
-const player2PawnEnPassantRow = 4;
 
 export function computePossibleMoves(board: MBoard, args: MPossibleMovesArgs): MBoardPossibleMove[] {
   const fromSquare = board.squareAt(args.from);
@@ -78,7 +83,12 @@ export function computePossibleMoves(board: MBoard, args: MPossibleMovesArgs): M
   return moves;
 }
 
-export function computeValidMoves(state: MGameState, board: MBoard, args: MValidMovesArgs): MBoardValidMove[] {
+export interface MValidMovesArgs {
+  from?: boardRepresentation.MSquareCode;
+  possibleMoves?: MBoardPossibleMove[];
+}
+
+export function computeValidMoves(board: MBoard, args: MValidMovesArgs): MBoardValidMove[] {
   let possibleMoves: MBoardPossibleMove[] | undefined = args.possibleMoves;
   if (possibleMoves === undefined && args.from !== undefined) {
     possibleMoves = computePossibleMoves(board, { from: args.from });
@@ -100,6 +110,15 @@ export function computeValidMoves(state: MGameState, board: MBoard, args: MValid
     }
   }
   return validMoves;
+}
+
+// #region internal
+
+const player1PawnEnPassantRow = 5;
+const player2PawnEnPassantRow = 4;
+
+interface MPossibleMovesInternalArgs extends MPossibleMovesArgs {
+  piece: MBSPiece;
 }
 
 function possibleMovesBishop(board: MBoard, args: MPossibleMovesInternalArgs): MBoardPossibleMove[] {
@@ -150,7 +169,7 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
       fromPiece: args.piece,
       from: args.from,
       to: code1Ahead,
-      take: undefined
+      takenPiece: undefined
     }));
   }
 
@@ -162,7 +181,8 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
         fromPiece: args.piece,
         from: args.from,
         to: code2Ahead,
-        take: undefined
+        takenPiece: undefined,
+        moveKind: MBMoveKind.PawnAdvanceTwoSquares
       }));
     }
   }
@@ -174,7 +194,8 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
       fromPiece: args.piece,
       from: args.from,
       to: codeTopRight,
-      take: pieceTopRight
+      takenPiece: pieceTopRight,
+      moveKind: MBMoveKind.Taking
     }));
   }
 
@@ -185,7 +206,8 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
       fromPiece: args.piece,
       from: args.from,
       to: codeTopLeft,
-      take: pieceTopLeft
+      takenPiece: pieceTopLeft,
+      moveKind: MBMoveKind.Taking
     }));
   }
 
@@ -208,11 +230,12 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
           fromPiece: args.piece,
           from: args.from,
           to: codeTopLeft,
-          take: pieceLeft
+          takenPiece: pieceLeft,
+          moveKind: MBMoveKind.EnPassant
         }));
       }
     }
-    const codeRight = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? -1 : 1), 0);
+    const codeRight = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? 1 : 1), 0);
     const pieceRight = board.pieceAt(codeRight);
     if (pieceRight !== undefined && pieceRight.side !== args.piece.side && pieceRight.moveCount === 0) {
       const codeTopRight = boardRepresentation.codeWithMove(args.from, (args.piece.side === MBSPieceSide.Player1 ? 1 : -1), (args.piece.side === MBSPieceSide.Player1 ? 1 : -1));
@@ -221,7 +244,8 @@ function possibleMovesPawn(board: MBoard, args: MPossibleMovesInternalArgs): MBo
           fromPiece: args.piece,
           from: args.from,
           to: codeTopRight,
-          take: pieceRight
+          takenPiece: pieceRight,
+          moveKind: MBMoveKind.EnPassant
         }));
       }
     }
@@ -272,7 +296,8 @@ function getPossibleMoves(board: MBoard, increments: MMoveIncrement[], args: MPo
           fromPiece: args.piece,
           from: args.from,
           to: nextCode,
-          take: nextSquare.piece
+          takenPiece: nextSquare.piece,
+          moveKind: MBMoveKind.Taking
         }));
       }
     } else {
@@ -280,7 +305,7 @@ function getPossibleMoves(board: MBoard, increments: MMoveIncrement[], args: MPo
         fromPiece: args.piece,
         from: args.from,
         to: nextCode,
-        take: undefined
+        takenPiece: undefined
       }));
     }
   }
@@ -300,7 +325,7 @@ function iteratePossibleMoves(board: MBoard, incrementHorizontal: number, increm
       fromPiece: args.piece,
       from: args.from,
       to: nextCode,
-      take: undefined
+      takenPiece: undefined
     }));
     cm += incrementHorizontal;
     rm += incrementVertical;
@@ -312,9 +337,12 @@ function iteratePossibleMoves(board: MBoard, incrementHorizontal: number, increm
       fromPiece: args.piece,
       from: args.from,
       to: nextCode,
-      take: nextSquare.piece
+      takenPiece: nextSquare.piece,
+      moveKind: MBMoveKind.Taking
     }));
   }
 
   return moves;
 }
+
+// #endregion internal

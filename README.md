@@ -12,7 +12,6 @@ The game is in a almost-playable state right now, the following is not handled:
 
 - castling
 - pawn promotion
-- "en passant"
 
 ## Technical info
 
@@ -26,9 +25,8 @@ Not sorted:
 
 - detect [stalemate](https://en.wikipedia.org/wiki/Stalemate) state
 - detect [draw](https://en.wikipedia.org/wiki/Draw_(chess)) state
-- handle "[en passant](https://en.wikipedia.org/wiki/En_passant)" move
 - handle [castling](https://en.wikipedia.org/wiki/Castling)
-- finish FEN notation handling (castling, en passant)
+- finish FEN notation handling (castling)
 - fully implement [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess))
 - implement undo move(s)
 - handle pawn [promotion](https://en.wikipedia.org/wiki/Promotion_(chess))

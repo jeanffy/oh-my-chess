@@ -112,8 +112,8 @@ export class MBoard {
       return;
     }
 
-    if (move.take !== undefined) {
-      const squareToRemove = this.squareAt(move.take.code);
+    if (move.takenPiece !== undefined) {
+      const squareToRemove = this.squareAt(move.takenPiece.code);
       if (squareToRemove !== undefined) {
         squareToRemove.piece = undefined;
       }

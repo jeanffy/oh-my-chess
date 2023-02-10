@@ -22,7 +22,7 @@ export class MGame {
     this.board.move(move);
     this.state.update(this.board, move);
     this.notations = MGameNotations.createFromGame(this);
-    return move.take;
+    return move.takenPiece;
   }
 
   public getAllValidMoves(pieceSide: MBSPieceSide): boardMoves.MBoardValidMove[] {
@@ -30,7 +30,7 @@ export class MGame {
     if (allPossibleMoves.length === 0) {
       return [];
     }
-    const allValidMoves = boardMoves.computeValidMoves(this.state, this.board, { possibleMoves: allPossibleMoves });
+    const allValidMoves = boardMoves.computeValidMoves(this.board, { possibleMoves: allPossibleMoves });
     return allValidMoves;
   }
 

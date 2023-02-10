@@ -2,7 +2,7 @@ import { MBoardValidMove } from '../board/board-moves';
 import { MGame } from '../game/game';
 import { MBSPieceSide } from '../board/board-square';
 import { MAIPlayerStrategyRandom } from './ai-player-strategy-random';
-import { MAIPlayerStrategy as MAIPlayerStrategy } from './ai-player-strategy';
+import { MAIPlayerStrategy } from './ai-player-strategy';
 
 export class MAIPlayerStrategyGreedy extends MAIPlayerStrategy {
   public constructor(game: MGame) {
@@ -18,8 +18,8 @@ export class MAIPlayerStrategyGreedy extends MAIPlayerStrategy {
     let higherStrength = Number.MIN_SAFE_INTEGER;
     let highestMove: MBoardValidMove | undefined;
     for (const validMove of validMoves) {
-      if (validMove.take !== undefined && validMove.take.strength > higherStrength) {
-        higherStrength = validMove.take.strength;
+      if (validMove.takenPiece !== undefined && validMove.takenPiece.strength > higherStrength) {
+        higherStrength = validMove.takenPiece.strength;
         highestMove = validMove;
       }
     }
