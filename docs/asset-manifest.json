@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/oh-my-chess/static/css/main.46dca946.css",
+    "main.js": "/oh-my-chess/static/js/main.91eeb495.js",
+    "static/js/787.6746db00.chunk.js": "/oh-my-chess/static/js/787.6746db00.chunk.js",
+    "static/media/rook.svg": "/oh-my-chess/static/media/rook.101a7c83033caad1c14b2d0ac1f96e94.svg",
+    "static/media/knight.svg": "/oh-my-chess/static/media/knight.ee0ffc99c1c5d40c4bfc81a018791dbc.svg",
+    "static/media/king.svg": "/oh-my-chess/static/media/king.b7048576ed1e3a30d4f91b2190716fdd.svg",
+    "static/media/queen.svg": "/oh-my-chess/static/media/queen.857380d60b53bb458dbf3b4805c1501f.svg",
+    "static/media/bishop.svg": "/oh-my-chess/static/media/bishop.d5f277126eb62e1426976eea92175a51.svg",
+    "index.html": "/oh-my-chess/index.html",
+    "static/media/pawn.svg": "/oh-my-chess/static/media/pawn.9fc8375c89477be4717f16aa45b61799.svg",
+    "main.46dca946.css.map": "/oh-my-chess/static/css/main.46dca946.css.map",
+    "main.91eeb495.js.map": "/oh-my-chess/static/js/main.91eeb495.js.map",
+    "787.6746db00.chunk.js.map": "/oh-my-chess/static/js/787.6746db00.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.46dca946.css",
+    "static/js/main.91eeb495.js"
+  ]
+}

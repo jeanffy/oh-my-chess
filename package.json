@@ -1,31 +1,35 @@
 {
   "name": "oh-my-chess",
+  "author": "jeanffy",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@emotion/react": "11.10.4",
-    "@emotion/styled": "11.10.4",
-    "@mui/material": "5.10.10",
-    "@testing-library/jest-dom": "5.16.5",
-    "@testing-library/react": "13.4.0",
-    "@testing-library/user-event": "13.5.0",
-    "@types/jest": "27.5.2",
-    "@types/node": "16.11.65",
-    "@types/react": "18.0.21",
-    "@types/react-dom": "18.0.6",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-scripts": "5.0.1",
-    "rxjs": "7.5.7",
-    "sass": "1.55.0",
-    "typescript": "4.8.4",
-    "web-vitals": "2.1.4"
-  },
+  "homepage": "/oh-my-chess/",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "BUILD_PATH='./docs' react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@emotion/react": "11.11.4",
+    "@emotion/styled": "11.11.5",
+    "@mui/material": "5.15.19",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-scripts": "5.0.1",
+    "rxjs": "7.8.1",
+    "sass": "1.77.4",
+    "web-vitals": "2.1.4"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.4.5",
+    "@testing-library/react": "15.0.7",
+    "@testing-library/user-event": "14.5.2",
+    "@types/jest": "29.5.12",
+    "@types/node": "20.12.13",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "typescript": "4.9.5"
   },
   "eslintConfig": {
     "extends": [

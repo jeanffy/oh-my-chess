@@ -2,7 +2,7 @@ import { MBoardValidMove } from '../board/board-moves';
 import { MGame } from '../game/game';
 import { MBSPieceSide } from '../board/board-square';
 import { MAIPlayerStrategyRandom } from './ai-player-strategy-random';
-import { MAIPlayerStrategy as MAIPlayerStrategy } from './ai-player-strategy';
+import { MAIPlayerStrategy } from './ai-player-strategy';
 
 export class MAIPlayerStrategyDeepThinker extends MAIPlayerStrategy {
   public constructor(game: MGame) {

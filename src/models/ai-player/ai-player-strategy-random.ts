@@ -1,4 +1,4 @@
-import { MAIPlayerStrategy as MAIPlayerStrategy } from './ai-player-strategy';
+import { MAIPlayerStrategy } from './ai-player-strategy';
 import { MGame } from '../game/game';
 import { MBoardValidMove } from '../board/board-moves';
 import { MBSPieceSide } from '../board/board-square';
